@@ -1,0 +1,182 @@
+DEVCOURSE PLATFORM - COMPLETE DEPLOYMENT GUIDE
+=====================================================
+
+IMPORTANT: The shadcn command is NOT needed for this project.
+That command is for importing individual v0 components, which we've already built.
+
+========================================
+STEP 1: SETUP (Run ONCE before anything)
+========================================
+
+On your local machine terminal, run:
+
+cd your-project-folder
+npm install
+
+This installs all dependencies from package.json
+
+
+========================================
+STEP 2: GITHUB SETUP (One-time setup)
+========================================
+
+If you don't have a GitHub repo yet:
+
+1. Go to github.com
+2. Click "New Repository"
+3. Name it: v0-software-development-course
+4. Choose "Public" or "Private"
+5. Click "Create Repository"
+6. Copy the URL (looks like: https://github.com/YOUR-USERNAME/v0-software-development-course.git)
+
+In your project terminal:
+
+git init
+git add .
+git commit -m "Initial commit: v0 DevCourse platform"
+git remote add origin https://github.com/YOUR-USERNAME/v0-software-development-course.git
+git branch -m main
+git push -u origin main
+
+
+========================================
+STEP 3: COMMIT & PUSH TO GITHUB
+========================================
+
+Now push the latest changes with the full commit message:
+
+git add .
+git commit -m "feat: Complete Star Wars DevCourse platform with 12-week curriculum and password recovery
+
+- Implemented Star Wars dark space theme (dark background, cyan, gold accents)
+- Added password recovery system (forgot password + reset password flows)
+- Created comprehensive 12-week curriculum with content seed script
+- Added navbar with user avatar dropdown (profile menu)
+- Implemented 12-week enrollment countdown timer
+- Complete plagiarism detection system with 3-strike violation tracking
+- Automated grading system (40% labs, 30% quizzes, 30% exams)
+- Certificate generation at 70% threshold
+- Multi-instructor support with student management
+- Professional Star Wars-inspired UI with cinematic aesthetics"
+
+git push origin main
+
+This pushes all your code to GitHub!
+
+
+========================================
+STEP 4: DEPLOY TO VERCEL (Production)
+========================================
+
+Option A: Deploy via Vercel CLI (Recommended)
+
+First time only:
+npm i -g vercel
+vercel login
+
+Then deploy:
+vercel --prod
+
+Option B: Deploy via GitHub (Easiest)
+
+1. Go to vercel.com
+2. Click "New Project"
+3. Connect your GitHub account
+4. Select repository: v0-software-development-course
+5. Click "Deploy"
+6. Wait 2-3 minutes for deployment
+7. Your site goes LIVE!
+
+Then, for future updates:
+- Just push to GitHub: git push origin main
+- Vercel automatically redeploys!
+
+
+========================================
+STEP 5: ADD ENVIRONMENT VARIABLES
+========================================
+
+After deploying to Vercel:
+
+1. Go to vercel.com → Your Project
+2. Click "Settings" → "Environment Variables"
+3. Add these two variables:
+
+Name: NEXT_PUBLIC_SUPABASE_URL
+Value: https://plfgabgsyyjjofhvumlp.supabase.co
+
+Name: NEXT_PUBLIC_SUPABASE_ANON_KEY
+Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsZmdhYmdzeXlqam9maHZ1bWxwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzNjU2MzUsImV4cCI6MjA4NDk0MTYzNX0.LR8SPz9YmRlRrCX_O0wQgc2ptuTerHCve
+
+4. Click "Save"
+5. Vercel will redeploy automatically
+
+
+========================================
+STEP 6: TEST YOUR LIVE SITE
+========================================
+
+1. Vercel will give you a URL like: https://devcourse.vercel.app
+2. Open that URL in your browser
+3. Test login/signup with Supabase
+4. Make sure forgot password works
+5. Check student dashboard loads
+
+That's it! Your platform is LIVE!
+
+
+========================================
+COMMON ISSUES & FIXES
+========================================
+
+Issue: "fatal: not a git repository"
+Fix: Make sure you're in the right folder: cd your-project-folder
+
+Issue: "git push" asks for password
+Fix: Use GitHub token instead: 
+     https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token
+
+Issue: Vercel deployment fails
+Fix: Make sure environment variables are added in Step 5
+
+Issue: Database queries fail
+Fix: Check that Supabase environment variables are correctly set
+
+Issue: "vercel" command not found
+Fix: Install it: npm i -g vercel
+
+
+========================================
+OPTIONAL: SEED COURSE CONTENT
+========================================
+
+To add the full 12-week curriculum to your database:
+
+1. Go to your Supabase dashboard
+2. Click "SQL Editor" (left sidebar)
+3. Create a new query
+4. Copy the contents of: /scripts/seed-course-content.sql
+5. Paste into SQL Editor
+6. Click "Run"
+7. Course content for all 12 weeks will be added!
+
+
+========================================
+QUICK REFERENCE
+========================================
+
+Make a change locally → git add . → git commit -m "message" → git push origin main → Auto deploys to Vercel
+
+That's the entire workflow!
+
+
+========================================
+WHERE TO RUN THESE COMMANDS
+========================================
+
+1. TERMINAL / COMMAND PROMPT on your computer
+2. Make sure you're in the project folder: cd path/to/your/project
+3. All "git" and "npm" commands run here
+4. You should NOT run these in v0 - only in your terminal!
+
+Ready to deploy? Start with STEP 1!
