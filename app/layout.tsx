@@ -1,7 +1,7 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
+
 import './globals.css'
 import Navbar from '@/components/navbar'
 
@@ -36,7 +36,6 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <Navbar />
         <main>{children}</main>
-        <Analytics />
       </body>
     </html>
   )

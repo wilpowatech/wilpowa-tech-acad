@@ -7,6 +7,7 @@ import { supabase } from '@/lib/auth'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import Navbar from '@/components/navbar'
+import { CourseScoreCard } from '@/components/score-pie-chart'
 
 interface Course { id: string; title: string; description: string }
 interface Enrollment { id: string; course: Course; start_date: string; status: string; student_id: string; course_id: string }
@@ -176,25 +177,17 @@ export default function StudentDashboard() {
                         <svg className={`w-5 h-5 text-muted-foreground transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                       </div>
 
-                      {/* Overall score bar */}
+                      {/* Score pie chart */}
                       {stats && (
-                        <div className="mt-4 grid grid-cols-4 gap-4">
-                          <div className="bg-background/60 border border-border rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-primary">{stats.overallScore}%</p>
-                            <p className="text-xs text-muted-foreground">Overall Score</p>
-                          </div>
-                          <div className="bg-background/60 border border-border rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-foreground">{stats.avgQuizScore}%</p>
-                            <p className="text-xs text-muted-foreground">Avg Quiz</p>
-                          </div>
-                          <div className="bg-background/60 border border-border rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-foreground">{stats.avgLabScore}%</p>
-                            <p className="text-xs text-muted-foreground">Avg Lab</p>
-                          </div>
-                          <div className="bg-background/60 border border-border rounded-lg p-3 text-center">
-                            <p className="text-2xl font-bold text-foreground">{stats.completedLectures}</p>
-                            <p className="text-xs text-muted-foreground">Lectures Done</p>
-                          </div>
+                        <div className="mt-4">
+                          <CourseScoreCard
+                            courseTitle={course?.title || 'Course'}
+                            overallScore={stats.overallScore}
+                            quizScore={stats.avgQuizScore}
+                            labScore={stats.avgLabScore}
+                            completedDays={stats.completedLectures}
+                            totalDays={stats.totalDays}
+                          />
                         </div>
                       )}
                     </button>

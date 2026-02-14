@@ -4,6 +4,23 @@ import { NextResponse } from 'next/server'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
+// GET: list all courses
+export async function GET() {
+  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+  const { data, error } = await supabaseAdmin
+    .from('courses')
+    .select('*, users!courses_instructor_id_fkey(full_name)')
+    .order('created_at', { ascending: false })
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  const courses = (data || []).map((c: any) => ({
+    ...c,
+    instructor_name: c.users?.full_name || 'Unknown',
+  }))
+  return NextResponse.json({ courses })
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
