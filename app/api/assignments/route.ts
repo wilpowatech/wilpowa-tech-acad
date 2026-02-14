@@ -27,7 +27,7 @@ export async function GET(req: Request) {
 // POST: assign content to selected students (bulk)
 export async function POST(req: Request) {
   const body = await req.json()
-  const { module_id, day_number, student_ids, course_id, available_at } = body
+  const { module_id, day_number, student_ids, course_id, available_at, deadline } = body
 
   if (!module_id || !day_number || !student_ids?.length || !course_id) {
     return NextResponse.json({ error: 'module_id, day_number, course_id, and student_ids are required' }, { status: 400 })
@@ -40,6 +40,18 @@ export async function POST(req: Request) {
     return d.toISOString()
   })()
 
+  // Calculate grace_deadline automatically: same duration as first window, starting after deadline
+  let resolvedDeadline: string | null = deadline || null
+  let graceDeadline: string | null = null
+
+  if (resolvedDeadline) {
+    const availDate = new Date(resolvedAvailableAt)
+    const deadDate = new Date(resolvedDeadline)
+    const durationMs = deadDate.getTime() - availDate.getTime()
+    // Grace period = deadline + same duration (auto second window)
+    graceDeadline = new Date(deadDate.getTime() + durationMs).toISOString()
+  }
+
   // Remove existing assignments for this module/day combo first
   await supabaseAdmin
     .from('content_assignments')
@@ -47,13 +59,17 @@ export async function POST(req: Request) {
     .eq('module_id', module_id)
     .eq('day_number', day_number)
 
-  // Insert new assignments
+  // Insert new assignments with deadline and grace period
   const records = student_ids.map((sid: string) => ({
     student_id: sid,
     module_id,
     day_number,
     course_id,
     available_at: resolvedAvailableAt,
+    deadline: resolvedDeadline,
+    grace_deadline: graceDeadline,
+    max_score_percentage: 100,
+    status: 'active',
   }))
 
   const { data, error } = await supabaseAdmin
@@ -62,5 +78,5 @@ export async function POST(req: Request) {
     .select()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ assignments: data })
+  return NextResponse.json({ assignments: data, grace_deadline: graceDeadline })
 }

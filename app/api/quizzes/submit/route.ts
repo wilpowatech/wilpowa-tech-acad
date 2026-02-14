@@ -23,6 +23,35 @@ export async function POST(req: Request) {
 
   if (quizError) return NextResponse.json({ error: quizError.message }, { status: 500 })
 
+  // Check deadline from content_assignments
+  let isLate = false
+  let maxScorePercentage = 100
+  const { data: assignment } = await supabaseAdmin
+    .from('content_assignments')
+    .select('*')
+    .eq('content_type', 'quiz')
+    .eq('content_id', quiz_id)
+    .eq('student_id', student_id)
+    .single()
+
+  if (assignment) {
+    const now = new Date()
+    const deadline = assignment.deadline ? new Date(assignment.deadline) : null
+    const graceDeadline = assignment.grace_deadline ? new Date(assignment.grace_deadline) : null
+
+    if (graceDeadline && now > graceDeadline) {
+      return NextResponse.json(
+        { error: 'Quiz deadline has passed. The grace period has expired.' },
+        { status: 403 }
+      )
+    }
+
+    if (deadline && now > deadline) {
+      isLate = true
+      maxScorePercentage = 60
+    }
+  }
+
   // Score the quiz
   let totalPoints = 0
   let earnedPoints = 0
@@ -47,7 +76,13 @@ export async function POST(req: Request) {
     })
   }
 
-  const score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0
+  let score = totalPoints > 0 ? Math.round((earnedPoints / totalPoints) * 100) : 0
+
+  // Apply late penalty (60% max if in grace period)
+  if (isLate) {
+    score = Math.round(score * (maxScorePercentage / 100))
+  }
+
   const passed = score >= (quiz.passing_score || 70)
 
   // Save submission
@@ -59,6 +94,8 @@ export async function POST(req: Request) {
       score,
       passed,
       completed_at: new Date().toISOString(),
+      is_late: isLate,
+      max_score_percentage: maxScorePercentage,
     })
     .select()
     .single()
@@ -117,5 +154,7 @@ export async function POST(req: Request) {
     total_points: totalPoints,
     earned_points: earnedPoints,
     results: responseRecords,
+    is_late: isLate,
+    max_score_percentage: maxScorePercentage,
   })
 }

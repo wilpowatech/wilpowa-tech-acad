@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { scoreGitHubRepo } from '@/lib/github-scorer'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -153,7 +154,53 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Lab not found' }, { status: 404 })
     }
 
-    const submittedCode = code || github_url || ''
+    // Check deadline from content_assignments
+    let isLate = false
+    let maxScorePercentage = 100
+    const { data: assignment } = await supabaseAdmin
+      .from('content_assignments')
+      .select('*')
+      .eq('content_type', 'lab')
+      .eq('content_id', lab_id)
+      .eq('student_id', student_id)
+      .single()
+
+    if (assignment) {
+      const now = new Date()
+      const deadline = assignment.deadline ? new Date(assignment.deadline) : null
+      const graceDeadline = assignment.grace_deadline ? new Date(assignment.grace_deadline) : null
+
+      if (graceDeadline && now > graceDeadline) {
+        return NextResponse.json(
+          { error: 'Submission deadline has passed. The grace period has expired.' },
+          { status: 403 }
+        )
+      }
+
+      if (deadline && now > deadline) {
+        isLate = true
+        maxScorePercentage = 60
+      }
+    }
+
+    // Determine submission type and get code/score
+    const isGitHub = !!github_url && !code
+    let submittedCode = code || ''
+    let githubScoreResult = null
+
+    if (isGitHub) {
+      // Extract keywords from lab instructions for GitHub scoring
+      const instructionKeywords = (lab.instructions || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .split(/\s+/)
+        .filter((w: string) => w.length > 4)
+        .filter((w: string, i: number, a: string[]) => a.indexOf(w) === i)
+        .slice(0, 15)
+
+      githubScoreResult = await scoreGitHubRepo(github_url, instructionKeywords)
+      submittedCode = github_url
+    }
 
     // Run anti-cheat check on code content
     const cheatCheck = runAntiCheatCheck(submittedCode)
@@ -190,13 +237,41 @@ export async function POST(req: Request) {
     }
 
     // Auto-score the lab
-    const { score, feedback } = scoreLabCode(submittedCode, lab.instructions || '')
+    let score: number
+    let feedback: string
+
+    if (isGitHub && githubScoreResult) {
+      // Use GitHub auto-scoring bot result
+      score = githubScoreResult.score
+      feedback = `GitHub Repo Score: ${score}/100\n\n${githubScoreResult.feedback}\n\nBreakdown:\n` +
+        `- Repo accessible: ${githubScoreResult.breakdown.repoExists}/10\n` +
+        `- README present: ${githubScoreResult.breakdown.readmePresent}/10\n` +
+        `- README quality: ${githubScoreResult.breakdown.readmeQuality}/10\n` +
+        `- Relevant files: ${githubScoreResult.breakdown.relevantFiles}/20\n` +
+        `- Code quality: ${githubScoreResult.breakdown.codeQuality}/20\n` +
+        `- File structure: ${githubScoreResult.breakdown.fileStructure}/15\n` +
+        `- Dependencies: ${githubScoreResult.breakdown.dependencies}/15`
+    } else {
+      const result = scoreLabCode(submittedCode, lab.instructions || '')
+      score = result.score
+      feedback = result.feedback
+    }
 
     // Apply penalty if cheat flagged
-    const finalScore = cheatCheck.flagged ? Math.max(0, score - 30) : score
-    const finalFeedback = cheatCheck.flagged
+    let finalScore = cheatCheck.flagged ? Math.max(0, score - 30) : score
+
+    // Apply late penalty (60% max if in grace period)
+    if (isLate) {
+      finalScore = Math.round(finalScore * (maxScorePercentage / 100))
+    }
+
+    let finalFeedback = cheatCheck.flagged
       ? `WARNING: Potential integrity violation detected.\nReasons: ${cheatCheck.reasons.join(', ')}\nScore reduced by 30 points.\n\n${feedback}`
       : feedback
+
+    if (isLate) {
+      finalFeedback = `LATE SUBMISSION: Score capped at ${maxScorePercentage}% (grace period).\n\n${finalFeedback}`
+    }
 
     // Scale score to lab total_points
     const scaledGrade = Math.round((finalScore / 100) * (lab.total_points || 100))
@@ -211,16 +286,23 @@ export async function POST(req: Request) {
       .limit(1)
 
     let submission
+    const submissionData = {
+      code: submittedCode,
+      submitted_at: new Date().toISOString(),
+      grade: scaledGrade,
+      feedback: finalFeedback,
+      graded_at: new Date().toISOString(),
+      submission_type: isGitHub ? 'github' : 'sandbox',
+      github_url: isGitHub ? github_url : null,
+      is_late: isLate,
+      max_score_percentage: maxScorePercentage,
+      score_breakdown: isGitHub && githubScoreResult ? githubScoreResult.breakdown : null,
+    }
+
     if (existing && existing.length > 0) {
       const { data, error } = await supabaseAdmin
         .from('lab_submissions')
-        .update({
-          code: submittedCode,
-          submitted_at: new Date().toISOString(),
-          grade: scaledGrade,
-          feedback: finalFeedback,
-          graded_at: new Date().toISOString(),
-        })
+        .update(submissionData)
         .eq('id', existing[0].id)
         .select()
         .single()
@@ -229,15 +311,7 @@ export async function POST(req: Request) {
     } else {
       const { data, error } = await supabaseAdmin
         .from('lab_submissions')
-        .insert({
-          lab_id,
-          student_id,
-          code: submittedCode,
-          submitted_at: new Date().toISOString(),
-          grade: scaledGrade,
-          feedback: finalFeedback,
-          graded_at: new Date().toISOString(),
-        })
+        .insert({ lab_id, student_id, ...submissionData })
         .select()
         .single()
       if (error) throw error
@@ -267,6 +341,10 @@ export async function POST(req: Request) {
       feedback: finalFeedback,
       cheat_flagged: cheatCheck.flagged,
       cheat_reasons: cheatCheck.reasons,
+      is_late: isLate,
+      max_score_percentage: maxScorePercentage,
+      submission_type: isGitHub ? 'github' : 'sandbox',
+      github_score: isGitHub ? githubScoreResult : null,
     })
   } catch (err) {
     console.error('Lab submission error:', err)
