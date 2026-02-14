@@ -6,11 +6,11 @@
 
 Make sure your Supabase integration is connected. Add these environment variables in Vercel:
 
-\`\`\`
+```
 NEXT_PUBLIC_SUPABASE_URL=your_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_key
-\`\`\`
+```
 
 ### 2. Database Migration
 
@@ -18,7 +18,7 @@ The database schema is created when the migration script runs. All tables, index
 
 ### 3. Deploy to Vercel
 
-\`\`\`bash
+```bash
 # Push to GitHub
 git add .
 git commit -m "Initial DevCourse deployment"
@@ -26,7 +26,7 @@ git push origin main
 
 # Deploy via Vercel dashboard or CLI
 vercel deploy
-\`\`\`
+```
 
 ## Testing the Platform
 
@@ -69,14 +69,14 @@ vercel deploy
 
 Go back to course and create 4 exams manually in Supabase:
 
-\`\`\`sql
+```sql
 INSERT INTO exams (course_id, exam_number, title, week_number, total_questions, passing_score, time_limit_minutes, points_total)
 VALUES
   (course_id, 1, 'Exam 1: Fundamentals', 4, 10, 70, 60, 100),
   (course_id, 2, 'Exam 2: Intermediate', 8, 15, 70, 90, 150),
   (course_id, 3, 'Exam 3: Advanced', 10, 15, 70, 90, 150),
   (course_id, 4, 'Exam 4: Comprehensive', 12, 20, 70, 120, 200);
-\`\`\`
+```
 
 #### Step 5: Add Exam Questions
 
@@ -194,24 +194,24 @@ If overall score ≥70%:
 
 ### View Violations
 
-\`\`\`sql
+```sql
 SELECT * FROM violations 
 WHERE student_id = 'student_uuid' 
 AND resolved = false;
-\`\`\`
+```
 
 ### Revoke Certificate
 
-\`\`\`sql
+```sql
 UPDATE certificates 
 SET status = 'revoked' 
 WHERE student_id = 'student_uuid' 
 AND course_id = 'course_uuid';
-\`\`\`
+```
 
 ### Reset Student Progress
 
-\`\`\`sql
+```sql
 DELETE FROM lab_submissions 
 WHERE student_id = 'student_uuid' 
 AND lab_id IN (SELECT id FROM labs WHERE module_id IN (SELECT id FROM modules WHERE course_id = 'course_uuid'));
@@ -223,7 +223,7 @@ AND quiz_id IN (SELECT id FROM quizzes WHERE lesson_id IN (SELECT id FROM lesson
 DELETE FROM exam_submissions 
 WHERE student_id = 'student_uuid' 
 AND exam_id IN (SELECT id FROM exams WHERE course_id = 'course_uuid');
-\`\`\`
+```
 
 ## Performance Testing
 
@@ -241,7 +241,7 @@ AND exam_id IN (SELECT id FROM exams WHERE course_id = 'course_uuid');
 
 ### Database Optimization
 
-\`\`\`sql
+```sql
 -- Check slow queries
 SELECT * FROM pg_stat_statements 
 WHERE mean_time > 100 
@@ -254,7 +254,7 @@ SELECT
   pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
 FROM pg_tables 
 ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
-\`\`\`
+```
 
 ## Common Issues & Solutions
 
@@ -298,9 +298,9 @@ ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
 
 ### Vercel Analytics
 
-\`\`\`
+```
 Dashboard → Analytics → Real-Time Events
-\`\`\`
+```
 
 Check:
 - 200 responses (success)
@@ -309,9 +309,9 @@ Check:
 
 ### Supabase Logs
 
-\`\`\`
+```
 Dashboard → Logs → API Requests
-\`\`\`
+```
 
 Monitor:
 - Auth failures
@@ -322,10 +322,10 @@ Monitor:
 ### Error Tracking
 
 Enable error tracking:
-\`\`\`typescript
+```typescript
 // Use Vercel's native error logging
 console.error("[v0] Error context:", errorDetails)
-\`\`\`
+```
 
 ## Backup & Recovery
 
@@ -340,9 +340,9 @@ Supabase automatically backs up daily. To restore:
 
 ### Manual Database Export
 
-\`\`\`bash
+```bash
 pg_dump postgres://user:password@host/database > backup.sql
-\`\`\`
+```
 
 ## Next Steps
 

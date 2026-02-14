@@ -1,59 +1,57 @@
 'use client'
 
+import React from "react"
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter, useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/auth'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+
+const OPTION_LABELS = ['A', 'B', 'C', 'D']
+
+interface Answer {
+  id: string
+  answer_text: string
+  order_number: number
+}
+
+interface Question {
+  id: string
+  question_text: string
+  points: number
+  exam_answers: Answer[]
+}
 
 interface Exam {
   id: string
   title: string
   description: string
-  exam_number: number
-  week_number: number
-  total_questions: number
   passing_score: number
-  time_limit_minutes: number
-  points_total: number
+  duration_minutes: number
+  exam_questions: Question[]
 }
 
-interface ExamQuestion {
-  id: string
-  question_text: string
-  question_type: string
-  points: number
-  order_number: number
-  answers: Array<{
-    id: string
-    answer_text: string
-    is_correct: boolean
-    order_number: number
-  }>
-}
-
-interface ExamSubmission {
-  id: string
-  exam_id: string
-  submitted_at: string
+interface SubmissionResult {
   score: number
   passed: boolean
-  status: string
+  total_points: number
+  earned_points: number
+  results: { question_id: string; selected_answer_id: string; is_correct: boolean }[]
 }
 
-export default function ExamPage() {
-  const { user, profile, loading: authLoading } = useAuth()
+export default function StudentExamPage() {
+  const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const { examId } = useParams()
   const [exam, setExam] = useState<Exam | null>(null)
-  const [questions, setQuestions] = useState<ExamQuestion[]>([])
-  const [submission, setSubmission] = useState<ExamSubmission | null>(null)
-  const [pageLoading, setPageLoading] = useState(true)
-  const [showExam, setShowExam] = useState(false)
-  const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [started, setStarted] = useState(false)
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
+  const [result, setResult] = useState<SubmissionResult | null>(null)
+  const [error, setError] = useState('')
+  const [timeLeft, setTimeLeft] = useState(0)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const autoSubmitRef = useRef(false)
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -62,144 +60,102 @@ export default function ExamPage() {
   }, [user, authLoading, router])
 
   useEffect(() => {
-    if (examId && user && profile?.role === 'student') {
-      fetchExamData()
+    if (examId && user) {
+      fetchExam()
     }
-  }, [examId, user, profile])
+  }, [examId, user])
 
-  const fetchExamData = async () => {
-    try {
-      // Fetch exam
-      const { data: examData, error: examError } = await supabase
-        .from('exams')
-        .select('*')
-        .eq('id', examId)
-        .single()
-
-      if (examError) throw examError
-      setExam(examData)
-
-      // Fetch questions
-      const { data: questionsData } = await supabase
-        .from('exam_questions')
-        .select(
-          `
-          id,
-          question_text,
-          question_type,
-          points,
-          order_number,
-          answers:exam_answers(id, answer_text, is_correct, order_number)
-        `
-        )
-        .eq('exam_id', examId)
-        .order('order_number', { ascending: true })
-
-      setQuestions(questionsData || [])
-
-      // Check for existing submission
-      const { data: submissionData } = await supabase
-        .from('exam_submissions')
-        .select('*')
-        .eq('exam_id', examId)
-        .eq('student_id', user?.id)
-        .order('submitted_at', { ascending: false })
-        .limit(1)
-
-      if (submissionData && submissionData.length > 0) {
-        setSubmission(submissionData[0])
-      }
-    } catch (err) {
-      console.error('Error fetching exam:', err)
-    } finally {
-      setPageLoading(false)
-    }
-  }
-
-  // Timer logic
   useEffect(() => {
-    if (!showExam || !exam) return
-
-    const endTime = Date.now() + exam.time_limit_minutes * 60 * 1000
-    setTimeRemaining(exam.time_limit_minutes * 60)
-
-    const interval = setInterval(() => {
-      const remaining = Math.round((endTime - Date.now()) / 1000)
-      if (remaining <= 0) {
-        handleSubmitExam()
-        clearInterval(interval)
-      } else {
-        setTimeRemaining(remaining)
-      }
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [showExam, exam])
-
-  const handleStartExam = () => {
-    setShowExam(true)
-  }
-
-  const handleAnswerChange = (questionId: string, answerId: string) => {
-    setAnswers((prev) => ({
-      ...prev,
-      [questionId]: answerId,
-    }))
-  }
-
-  const handleSubmitExam = async () => {
-    setSubmitting(true)
-    try {
-      // Calculate score
-      let score = 0
-      let totalPoints = 0
-
-      for (const question of questions) {
-        totalPoints += question.points
-        const selectedAnswerId = answers[question.id]
-        const selectedAnswer = question.answers.find((a) => a.id === selectedAnswerId)
-
-        if (selectedAnswer?.is_correct) {
-          score += question.points
-        }
-      }
-
-      const percentage = (score / totalPoints) * 100
-
-      // Save submission
-      const { data, error } = await supabase
-        .from('exam_submissions')
-        .insert({
-          student_id: user?.id,
-          exam_id: examId,
-          status: 'graded',
-          score: Math.round(percentage * 100) / 100,
-          passed: percentage >= exam!.passing_score,
-          completed_at: new Date().toISOString(),
+    if (started && timeLeft > 0 && !result) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current)
+            autoSubmitRef.current = true
+            return 0
+          }
+          return prev - 1
         })
-        .select()
+      }, 1000)
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [started, result])
 
-      if (error) throw error
+  // Auto-submit when time runs out
+  useEffect(() => {
+    if (autoSubmitRef.current && timeLeft === 0 && !result && !submitting) {
+      autoSubmitRef.current = false
+      submitExam()
+    }
+  }, [timeLeft, result, submitting])
 
-      setSubmission(data[0])
-      setShowExam(false)
-      alert(
-        `Exam submitted! Your score: ${Math.round(percentage * 100) / 100}% ${percentage >= exam!.passing_score ? '✓ Passed' : '✗ Did not pass'}`
-      )
+  const fetchExam = async () => {
+    try {
+      const res = await fetch(`/api/exams/${examId}`)
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+      setExam(data.exam)
     } catch (err) {
-      console.error('Error submitting exam:', err)
-      alert('Failed to submit exam')
+      setError((err as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const startExam = () => {
+    if (!exam) return
+    setStarted(true)
+    setTimeLeft(exam.duration_minutes * 60)
+  }
+
+  const selectAnswer = (questionId: string, answerId: string) => {
+    if (result) return
+    setAnswers((prev) => ({ ...prev, [questionId]: answerId }))
+  }
+
+  const submitExam = useCallback(async () => {
+    if (!exam || !user || submitting) return
+
+    setSubmitting(true)
+    setError('')
+    if (timerRef.current) clearInterval(timerRef.current)
+
+    try {
+      const res = await fetch('/api/exams/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          exam_id: examId,
+          student_id: user.id,
+          answers,
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error)
+
+      setResult(data)
+    } catch (err) {
+      setError((err as Error).message)
     } finally {
       setSubmitting(false)
     }
+  }, [exam, user, answers, examId, submitting])
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
   }
 
-  if (authLoading || pageLoading) {
+  if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading exam...</p>
+          <div className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading exam...</p>
         </div>
       </div>
     )
@@ -207,138 +163,208 @@ export default function ExamPage() {
 
   if (!exam) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <p className="text-gray-300">Exam not found</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Exam not found</p>
+      </div>
+    )
+  }
+
+  const answeredCount = Object.keys(answers).length
+  const totalQuestions = exam.exam_questions.length
+
+  // Start screen
+  if (!started && !result) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-card/80 border border-border rounded-xl p-8 max-w-lg w-full text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-2">{exam.title}</h1>
+          {exam.description && <p className="text-muted-foreground mb-6">{exam.description}</p>}
+
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <div className="bg-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-muted-foreground">Questions</p>
+              <p className="text-lg font-bold text-foreground">{totalQuestions}</p>
+            </div>
+            <div className="bg-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-muted-foreground">Duration</p>
+              <p className="text-lg font-bold text-foreground">{exam.duration_minutes} min</p>
+            </div>
+            <div className="bg-muted rounded-lg px-4 py-3">
+              <p className="text-xs text-muted-foreground">Pass Score</p>
+              <p className="text-lg font-bold text-foreground">{exam.passing_score}%</p>
+            </div>
+          </div>
+
+          <div className="bg-background/50 border border-border rounded-lg p-4 mb-6 text-left">
+            <h3 className="text-sm font-semibold text-foreground mb-2">Instructions</h3>
+            <ul className="space-y-1 text-muted-foreground text-sm">
+              <li>- You have {exam.duration_minutes} minutes to complete this exam</li>
+              <li>- Answer all {totalQuestions} questions (A-D multiple choice)</li>
+              <li>- You must score at least {exam.passing_score}% to pass</li>
+              <li>- The exam auto-submits when time runs out</li>
+              <li>- This exam covers everything taught this month</li>
+            </ul>
+          </div>
+
+          <button
+            type="button"
+            onClick={startExam}
+            className="inline-flex items-center justify-center rounded-md px-8 py-3 text-sm font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+          >
+            Start Exam
+          </button>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <header className="border-b border-slate-700 bg-slate-900/50 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex justify-between items-center">
+    <div className="min-h-screen">
+      {/* Header with Timer */}
+      <header className="border-b border-border bg-background/50 backdrop-blur sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">📊 Exam {exam.exam_number}</h1>
-            <p className="text-gray-400 text-sm mt-1">{exam.title}</p>
+            <h1 className="text-xl font-bold text-foreground">{exam.title}</h1>
+            <p className="text-sm text-muted-foreground">{answeredCount}/{totalQuestions} answered</p>
           </div>
-          {showExam && timeRemaining !== null && (
-            <div className={`text-center ${timeRemaining < 300 ? 'text-red-400' : 'text-blue-400'}`}>
-              <p className="text-sm text-gray-400">Time Remaining</p>
-              <p className="text-3xl font-bold font-mono">
-                {Math.floor(timeRemaining / 60)}:{String(timeRemaining % 60).padStart(2, '0')}
-              </p>
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {!result && (
+              <div className={`font-mono text-lg font-bold px-3 py-1 rounded-lg ${
+                timeLeft <= 60 ? 'bg-destructive/20 text-destructive animate-pulse' : 'bg-muted text-foreground'
+              }`}>
+                {formatTime(timeLeft)}
+              </div>
+            )}
+            {!result && (
+              <button
+                type="button"
+                onClick={submitExam}
+                disabled={submitting}
+                className="inline-flex items-center justify-center rounded-md px-6 py-2 text-sm font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50 transition-colors"
+              >
+                {submitting ? 'Submitting...' : 'Submit Exam'}
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {!showExam ? (
-          <div className="space-y-6">
-            {/* Exam Info */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Exam Details</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                <InfoCard label="Questions" value={exam.total_questions} />
-                <InfoCard label="Time Limit" value={`${exam.time_limit_minutes} min`} />
-                <InfoCard label="Total Points" value={exam.points_total} />
-                <InfoCard label="Passing Score" value={`${exam.passing_score}%`} />
-              </div>
-              <p className="text-gray-400 mb-6">{exam.description}</p>
-
-              {submission ? (
-                <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 mb-6">
-                  <p className="text-gray-300 font-semibold mb-2">Previous Attempt</p>
-                  <p className="text-gray-400">
-                    Score: <span className="text-blue-400 font-bold">{submission.score}%</span>
-                  </p>
-                  <p className="text-gray-400">
-                    Status: {submission.passed ? <span className="text-green-400">✓ Passed</span> : <span className="text-red-400">✗ Failed</span>}
-                  </p>
-                </div>
-              ) : null}
-
-              <Button onClick={handleStartExam} size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
-                Start Exam
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Result Banner */}
+        {result && (
+          <div className={`rounded-xl p-6 mb-8 border ${
+            result.passed
+              ? 'bg-secondary/10 border-secondary/50'
+              : 'bg-destructive/10 border-destructive/50'
+          }`}>
+            <h2 className={`text-2xl font-bold mb-2 ${result.passed ? 'text-secondary' : 'text-destructive'}`}>
+              {result.passed ? 'Exam Passed!' : 'Exam Not Passed'}
+            </h2>
+            <p className="text-foreground text-lg">Score: <span className="font-bold">{result.score}%</span></p>
+            <p className="text-muted-foreground text-sm mt-1">
+              {result.earned_points}/{result.total_points} points earned | Passing: {exam.passing_score}%
+            </p>
+            <div className="mt-4">
+              <Button variant="outline" className="border-border" onClick={() => router.back()}>
+                Back to Dashboard
               </Button>
-            </div>
-
-            {/* Instructions */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-8">
-              <h3 className="text-xl font-bold text-white mb-4">Instructions</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>• You have {exam.time_limit_minutes} minutes to complete this exam</li>
-                <li>• Answer all {exam.total_questions} questions</li>
-                <li>• You must score at least {exam.passing_score}% to pass</li>
-                <li>• Your answers are automatically saved as you progress</li>
-                <li>• You can review your answers before submitting</li>
-                <li>• Once submitted, you cannot retake the exam</li>
-              </ul>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {/* Exam Questions */}
-            {questions.map((question, index) => (
-              <div key={question.id} className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-                <div className="mb-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-bold text-white">Question {index + 1}</h3>
-                    <span className="text-sm text-gray-400">{question.points} points</span>
-                  </div>
-                  <p className="text-gray-300">{question.question_text}</p>
-                </div>
-
-                <div className="space-y-3">
-                  {question.answers.map((answer) => (
-                    <label key={answer.id} className="flex items-start gap-3 cursor-pointer group">
-                      <input
-                        type="radio"
-                        name={question.id}
-                        value={answer.id}
-                        checked={answers[question.id] === answer.id}
-                        onChange={() => handleAnswerChange(question.id, answer.id)}
-                        className="mt-1"
-                      />
-                      <div className="flex-1 bg-slate-700 hover:bg-slate-600 transition rounded-lg p-4">
-                        <p className="text-gray-300 group-hover:text-white transition">{answer.answer_text}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-
-            {/* Submit Button */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 sticky bottom-0">
-              <div className="flex gap-4">
-                <Button
-                  onClick={handleSubmitExam}
-                  disabled={submitting}
-                  size="lg"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                >
-                  {submitting ? 'Submitting...' : 'Submit Exam'}
-                </Button>
-                <Button variant="outline" size="lg" className="flex-1 border-slate-600 bg-transparent" disabled>
-                  {Object.keys(answers).length} / {questions.length} answered
-                </Button>
-              </div>
             </div>
           </div>
         )}
-      </main>
-    </div>
-  )
-}
 
-function InfoCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-4 text-center">
-      <p className="text-gray-400 text-sm mb-2">{label}</p>
-      <p className="text-2xl font-bold text-blue-400">{value}</p>
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 rounded-lg text-sm mb-6">
+            {error}
+          </div>
+        )}
+
+        {/* Questions */}
+        <div className="space-y-6">
+          {exam.exam_questions.map((question, qIdx) => {
+            const selectedId = answers[question.id]
+            const questionResult = result?.results.find((r) => r.question_id === question.id)
+
+            return (
+              <div key={question.id} className="bg-card/80 border border-border rounded-xl p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="font-semibold text-foreground">
+                    <span className="text-muted-foreground mr-2">Q{qIdx + 1}.</span>
+                    {question.question_text}
+                  </h3>
+                  <span className="text-xs font-medium px-2 py-1 rounded bg-muted text-muted-foreground shrink-0 ml-4">
+                    {question.points} pts
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {question.exam_answers.map((answer, aIdx) => {
+                    const isSelected = selectedId === answer.id
+                    let borderColor = 'border-border'
+                    let bgColor = 'bg-background/50'
+                    let textColor = 'text-foreground'
+
+                    if (result && questionResult) {
+                      if (questionResult.is_correct && isSelected) {
+                        borderColor = 'border-secondary'
+                        bgColor = 'bg-secondary/10'
+                        textColor = 'text-secondary'
+                      } else if (!questionResult.is_correct && isSelected) {
+                        borderColor = 'border-destructive'
+                        bgColor = 'bg-destructive/10'
+                        textColor = 'text-destructive'
+                      }
+                    } else if (isSelected) {
+                      borderColor = 'border-primary'
+                      bgColor = 'bg-primary/10'
+                    }
+
+                    return (
+                      <button
+                        key={answer.id}
+                        type="button"
+                        onClick={() => selectAnswer(question.id, answer.id)}
+                        disabled={!!result}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-colors text-left ${borderColor} ${bgColor} ${
+                          !result ? 'hover:border-primary/50 hover:bg-primary/5 cursor-pointer' : ''
+                        }`}
+                      >
+                        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {OPTION_LABELS[aIdx]}
+                        </span>
+                        <span className={`text-sm ${textColor}`}>{answer.answer_text}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {result && questionResult && (
+                  <p className={`text-xs font-medium mt-3 ${questionResult.is_correct ? 'text-secondary' : 'text-destructive'}`}>
+                    {questionResult.is_correct ? 'Correct!' : 'Incorrect'}
+                  </p>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Bottom Submit */}
+        {!result && (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={submitExam}
+              disabled={submitting}
+              className="inline-flex items-center justify-center rounded-md px-8 py-3 text-sm font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 disabled:opacity-50 transition-colors"
+            >
+              {submitting ? 'Submitting...' : `Submit Exam (${answeredCount}/${totalQuestions} answered)`}
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 
 ## 1. Authentication Flow
 
-\`\`\`
+```
 ┌─────────────────┐
 │ Landing Page    │
 │    (/)          │
@@ -40,11 +40,11 @@
 │ Dashboard   │  │ Dashboard       │
 │ (/student)  │  │ (/instructor)   │
 └─────────────┘  └─────────────────┘
-\`\`\`
+```
 
 ## 2. Student Learning Flow
 
-\`\`\`
+```
 ┌────────────────────────────┐
 │ Student Dashboard          │
 │ - 12-Week Countdown        │
@@ -126,11 +126,11 @@
 │ CERT │   │ RETAKE   │
 └──────┘   │ OPTION   │
            └──────────┘
-\`\`\`
+```
 
 ## 3. Lab Submission & Plagiarism Check
 
-\`\`\`
+```
 ┌──────────────────┐
 │ Student Views    │
 │ Lab Assignment   │
@@ -210,11 +210,11 @@ GRADE APPEARS IN:
 ├─ Progress report
 ├─ Overall grade (via lab_score)
 └─ Certificate eligibility calc
-\`\`\`
+```
 
 ## 4. Exam Taking Flow
 
-\`\`\`
+```
 ┌──────────────────────┐
 │ Exam Available       │
 │ (Week 4, 8, 10, 12)  │
@@ -308,11 +308,11 @@ GRADE APPEARS IN:
     │ TO STUDENT       │
     │ (Can't retake)   │
     └──────────────────┘
-\`\`\`
+```
 
 ## 5. Grading & Certificate Flow
 
-\`\`\`
+```
 ┌──────────────────────────┐
 │ All 12 Weeks Complete    │
 │                          │
@@ -387,11 +387,11 @@ GRADE APPEARS IN:
     │ 4. Print            │
     │ 5. Add to Resume    │
     └─────────────────────┘
-\`\`\`
+```
 
 ## 6. Instructor Dashboard Flow
 
-\`\`\`
+```
 ┌─────────────────────┐
 │ Instructor Login    │
 │ (/instructor/auth)  │
@@ -477,11 +477,11 @@ GRADE APPEARS IN:
     │ - Take quizzes           │
     │ - Get grades             │
     └──────────────────────────┘
-\`\`\`
+```
 
 ## 7. Plagiarism Violation & Strike System
 
-\`\`\`
+```
 ┌──────────────────┐
 │ Lab Submitted    │
 │ Similarity: 95%  │
@@ -523,11 +523,11 @@ BUT IF...
               → Cannot submit more work
               → Cannot get certificate
               → Instructor can appeal
-\`\`\`
+```
 
 ## 8. Multi-Instructor Isolation
 
-\`\`\`
+```
 ┌──────────────────────────┐
 │ Instructor A             │
 │ Course: "Web Dev"        │
@@ -546,7 +546,7 @@ BUT IF...
     └──────────────────┘
 
 Same for Instructor B - completely isolated data
-\`\`\`
+```
 
 ---
 

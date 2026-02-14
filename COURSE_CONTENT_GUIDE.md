@@ -185,7 +185,7 @@ This guide explains how to add course content for each of the 12 weeks. The cour
 
 ### Lecture Notes
 Use markdown format:
-\`\`\`markdown
+```markdown
 # Topic Title
 
 ## Key Concepts
@@ -193,14 +193,14 @@ Use markdown format:
 - Concept 2
 
 ## Code Example
-\`\`\`js
+```js
 console.log("Hello World");
-\`\`\`
+```
 
 ## Practice Exercise
 1. Try building X
 2. Implement feature Y
-\`\`\`
+```
 
 ### Lab Descriptions
 Should include:
@@ -220,7 +220,7 @@ Each quiz should have:
 ## Example Content
 
 ### Sample Lecture Note
-\`\`\`
+```
 # React Hooks Mastery
 
 ## Learning Objectives
@@ -234,12 +234,12 @@ By the end of this lecture, you will:
 The useState hook allows you to add state to functional components.
 
 ### Syntax
-\`\`\`js
+```js
 const [state, setState] = useState(initialValue);
-\`\`\`
+```
 
 ### Example: Counter Component
-\`\`\`js
+```js
 function Counter() {
   const [count, setCount] = useState(0);
   
@@ -252,7 +252,7 @@ function Counter() {
     </div>
   );
 }
-\`\`\`
+```
 
 ## Practice Exercise
 Create a form component that tracks:
@@ -262,7 +262,7 @@ Create a form component that tracks:
 - Form submission
 
 Validate that all fields are required.
-\`\`\`
+```
 
 ## Plagiarism Detection
 

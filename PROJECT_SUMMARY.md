@@ -16,7 +16,7 @@ A professional, **ALX-style software development bootcamp platform** with a comp
 
 ## File Structure Overview
 
-\`\`\`
+```
 /app
   /auth
     /login/page.tsx          # Student/Instructor login
@@ -60,7 +60,7 @@ A professional, **ALX-style software development bootcamp platform** with a comp
   /SETUP_GUIDE.md            # Complete architecture & setup instructions
   /DEPLOYMENT.md             # Testing & deployment procedures
   /PROJECT_SUMMARY.md        # This file
-\`\`\`
+```
 
 ## Core Features Implemented
 
@@ -165,7 +165,7 @@ A professional, **ALX-style software development bootcamp platform** with a comp
 
 ## Grading Formula
 
-\`\`\`
+```
 Final Score = (Lab Avg × 0.40) + (Quiz Avg × 0.30) + (Exam Avg × 0.30)
 
 Where:
@@ -173,7 +173,7 @@ Where:
 - Quiz Avg = Average of all quiz scores
 - Exam Avg = Average of 4 exam scores
 - Passing = ≥ 70%
-\`\`\`
+```
 
 ## Plagiarism Detection Algorithm
 
@@ -188,7 +188,7 @@ Where:
 
 ### Student Complete's Course in 12 Weeks
 
-\`\`\`
+```
 Week 1:  Enroll → Timer starts (12 weeks) → Complete lectures/labs/quiz
 Week 2:  Continue learning → Submit more labs → Take quizzes
 Week 3:  Same pattern
@@ -204,11 +204,11 @@ End of Week 12:
   ✓ Certificate auto-generated
   ✓ Student can download certified document
   ✓ Certificate number in system for verification
-\`\`\`
+```
 
 ### Instructor Manages Course
 
-\`\`\`
+```
 1. Create course (12 weeks, title, description)
 2. For each week:
    - Add 2-3 lectures with content
@@ -223,7 +223,7 @@ End of Week 12:
 6. Review submissions and plagiarism flags
 7. Manage violations & strikes
 8. Issue certificates upon completion
-\`\`\`
+```
 
 ## Deployment Checklist
 

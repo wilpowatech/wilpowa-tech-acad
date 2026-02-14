@@ -6,21 +6,21 @@
 
 Add to your Vercel project settings:
 
-\`\`\`
+```
 NEXT_PUBLIC_SUPABASE_URL=paste_your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=paste_your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=paste_your_service_key
-\`\`\`
+```
 
 ### Step 2: Deploy (2 min)
 
-\`\`\`bash
+```bash
 # Push to GitHub
 git push origin main
 
 # Deploy to Vercel (or use Vercel dashboard)
 vercel deploy
-\`\`\`
+```
 
 The database schema is created automatically on first deploy.
 
@@ -133,7 +133,7 @@ Visit your deployed URL and:
 
 Monitor these to track adoption:
 
-\`\`\`
+```
 Daily Active Users (DAU)
 - Supabase → Analytics → API Requests
 
@@ -148,7 +148,7 @@ Plagiarism Detection Rate
 
 Certificate Issuance Rate
 - Certificates issued ÷ Completed courses
-\`\`\`
+```
 
 ## 🔗 Useful Links
 
@@ -171,43 +171,43 @@ Certificate Issuance Rate
 ### Change Primary Color
 
 **In `/app/globals.css`:**
-\`\`\`css
+```css
 --primary-blue: #2563eb; /* Change this hex color */
-\`\`\`
+```
 
 ### Adjust Grading Weights
 
 **In `/lib/grading.ts`:**
-\`\`\`typescript
+```typescript
 export const DEFAULT_WEIGHTS = {
   labWeight: 0.50,      // Increase to 50%
   quizWeight: 0.25,     // Decrease to 25%
   examWeight: 0.25,     // Keep at 25%
 }
-\`\`\`
+```
 
 ### Change Plagiarism Threshold
 
 **In `/lib/plagiarism.ts`:**
-\`\`\`typescript
+```typescript
 const PLAGIARISM_THRESHOLD = 0.70; // Flag if >70% similar
 // Change to 0.80 for 80% threshold
-\`\`\`
+```
 
 ### Add More Exams
 
 Modify the schema to create more exam periods:
 
-\`\`\`sql
+```sql
 INSERT INTO exams (course_id, exam_number, week_number, title)
 VALUES (course_id, 5, 16, 'Bonus Exam');
-\`\`\`
+```
 
 ## 🎓 Course Creation Template
 
 Use this structure for new courses:
 
-\`\`\`
+```
 Week 1-3:  Fundamentals
 - Lecture 1: Introduction
 - Lecture 2: Setup
@@ -229,7 +229,7 @@ Week 9-11: Advanced Topics
 - Lab 4: Performance
 ↓
 Week 12: EXAM 3 & 4 + Final Projects
-\`\`\`
+```
 
 ## ✅ Final Checklist Before Going Live
 

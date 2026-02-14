@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
 export default function Home() {
@@ -24,31 +25,40 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading...</p>
+          <div className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen">
       {/* Navigation */}
-      <nav className="border-b border-slate-700 bg-slate-900/50 backdrop-blur">
+      <nav className="border-b border-border bg-background/50 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-white">DevCourse</h1>
+          <Link href="/">
+            <Image
+              src="/logo.png"
+              alt="Wilpowa Tech Academy"
+              width={180}
+              height={50}
+              className="h-10 w-auto object-contain"
+              priority
+            />
+          </Link>
           <div className="flex gap-4">
             {!user ? (
               <>
                 <Link href="/auth/login">
-                  <Button variant="outline" className="border-slate-600 text-gray-300 hover:text-white bg-transparent">
+                  <Button variant="outline" className="border-border text-foreground hover:text-foreground bg-transparent">
                     Sign In
                   </Button>
                 </Link>
                 <Link href="/auth/signup">
-                  <Button className="bg-blue-600 hover:bg-blue-700">Sign Up</Button>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Sign Up</Button>
                 </Link>
               </>
             ) : null}
@@ -58,20 +68,20 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-        <h2 className="text-5xl font-bold text-white mb-6">Professional Software Development Bootcamp</h2>
-        <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+        <h2 className="text-5xl font-bold text-foreground mb-6 text-balance">Professional Software Development Bootcamp</h2>
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
           Master full-stack development in 12 weeks with real-world projects, hands-on labs, and expert instruction.
         </p>
 
         {!user ? (
           <div className="flex justify-center gap-4">
             <Link href="/auth/signup?role=student">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Enroll as Student
               </Button>
             </Link>
             <Link href="/auth/signup?role=instructor">
-              <Button size="lg" variant="outline" className="border-slate-600 text-gray-300 hover:text-white bg-transparent">
+              <Button size="lg" variant="outline" className="border-border text-foreground hover:text-foreground bg-transparent">
                 Become an Instructor
               </Button>
             </Link>
@@ -115,11 +125,11 @@ export default function Home() {
             },
           ].map((feature, i) => (
             <Link key={i} href={feature.href} className="group">
-              <div className="h-full bg-slate-800 border border-slate-700 rounded-lg p-6 hover:border-blue-500 hover:bg-slate-700/50 transition-all duration-300 cursor-pointer">
-                <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors">{feature.title}</h3>
-                <p className="text-gray-400 group-hover:text-gray-300 transition-colors">{feature.description}</p>
-                <div className="mt-4 text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium">
-                  Learn more →
+              <div className="h-full bg-card/80 border border-border rounded-lg p-6 hover:border-primary hover:bg-card transition-all duration-300 cursor-pointer">
+                <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">{feature.title}</h3>
+                <p className="text-muted-foreground group-hover:text-foreground transition-colors">{feature.description}</p>
+                <div className="mt-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium">
+                  Learn more &rarr;
                 </div>
               </div>
             </Link>

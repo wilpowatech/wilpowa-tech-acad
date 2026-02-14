@@ -127,19 +127,19 @@ The platform includes a sophisticated plagiarism detection system:
 
 Add to your Vercel project settings (Settings > Environment Variables):
 
-\`\`\`
+```
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-\`\`\`
+```
 
 ### 2. Database Setup
 
 The schema is automatically created by running the migration script:
 
-\`\`\`bash
+```bash
 # This creates all tables, indexes, and RLS policies
-\`\`\`
+```
 
 ### 3. User Authentication
 
@@ -179,9 +179,9 @@ The schema is automatically created by running the migration script:
 
 ### Calculation
 
-\`\`\`
+```
 Final Score = (Lab Score × 0.40) + (Quiz Score × 0.30) + (Exam Score × 0.30)
-\`\`\`
+```
 
 ### Lab Score (40%)
 - Average of all lab submissions
@@ -270,14 +270,14 @@ Revocation automatically:
 
 ### 12-Week Structure
 
-\`\`\`
+```
 Week 1-3:  Module 1 (Intro & Fundamentals)
 Week 4:    Exam 1 + Module 2 begins
 Week 5-7:  Module 2 continued
 Week 8:    Exam 2 + Module 3 begins
 Week 9-11: Module 3 continued
 Week 12:   Exam 4 + Final Assessments
-\`\`\`
+```
 
 ### Deadlines
 

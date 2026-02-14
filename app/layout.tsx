@@ -1,40 +1,29 @@
 import React from "react"
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+import Navbar from '@/components/navbar'
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'DevCourse - Professional Software Development Bootcamp',
-  description: 'Master full-stack development in 12 weeks with real-world projects, hands-on labs, and expert instruction. Professional bootcamp platform with plagiarism detection and certificate generation.',
-  generator: 'v0.app',
+  title: 'Wilpowa Tech Academy - Professional Software Development Bootcamp',
+  description: 'Master full-stack development in 12 weeks with real-world projects, hands-on labs, and expert instruction.',
   keywords: ['bootcamp', 'software development', 'education', 'coding', 'learning platform'],
-  authors: [{ name: 'DevCourse Team' }],
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
+  authors: [{ name: 'Wilpowa Tech Academy' }],
   openGraph: {
-    title: 'DevCourse - Professional Software Development Bootcamp',
+    title: 'Wilpowa Tech Academy - Professional Software Development Bootcamp',
     description: 'Master full-stack development in 12 weeks',
     type: 'website',
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#0a0e27',
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
@@ -43,9 +32,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body className={`font-sans antialiased`}>
-        {children}
+        <Navbar />
+        <main>{children}</main>
         <Analytics />
       </body>
     </html>

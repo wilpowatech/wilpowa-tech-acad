@@ -122,5 +122,22 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image: url('/site-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 14, 39, 0.82);
+    z-index: 0;
+    pointer-events: none;
+  }
+  body > * {
+    position: relative;
+    z-index: 1;
   }
 }
