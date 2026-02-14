@@ -1,6 +1,7 @@
 /**
  * Grading and Scoring System
- * Calculates final scores based on: Labs (40%), Quizzes (30%), Exams (30%)
+ * Daily scores: Quiz (40%) + Lab (60%)
+ * Overall course: Daily scores + Exams (monthly, scored separately)
  */
 
 export interface GradingWeights {
@@ -9,11 +10,33 @@ export interface GradingWeights {
   examWeight: number
 }
 
-// Default weights: Labs 40%, Quizzes 30%, Exams 30%
+// Daily weights: Quiz 40%, Lab 60%
+export const DAILY_WEIGHTS = {
+  quizWeight: 0.4,
+  labWeight: 0.6,
+}
+
+// Overall course weights: Daily average 70%, Exams 30%
 export const DEFAULT_WEIGHTS: GradingWeights = {
-  labWeight: 0.4,
-  quizWeight: 0.3,
+  labWeight: 0.42,   // 60% of 70% daily portion
+  quizWeight: 0.28,  // 40% of 70% daily portion
   examWeight: 0.3,
+}
+
+/**
+ * Calculate a single day's score using 40% quiz + 60% lab
+ */
+export function calculateDailyScore(quizScore: number, labScore: number): number {
+  return Math.round((quizScore * DAILY_WEIGHTS.quizWeight + labScore * DAILY_WEIGHTS.labWeight) * 100) / 100
+}
+
+/**
+ * Apply late penalty: if late, cap score at maxPercentage of earned score
+ */
+export function applyLatePenalty(score: number, isLate: boolean, maxScorePercentage: number = 100): number {
+  if (!isLate) return score
+  const cappedScore = score * (maxScorePercentage / 100)
+  return Math.round(cappedScore * 100) / 100
 }
 
 export interface StudentGrades {

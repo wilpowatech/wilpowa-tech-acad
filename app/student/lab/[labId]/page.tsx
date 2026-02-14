@@ -29,30 +29,64 @@ interface Submission {
   grade: number | null
   feedback: string | null
   graded_at: string | null
+  is_late?: boolean
+  github_url?: string | null
+  submission_type?: string
 }
 
-function useCountdown(deadline: string | null) {
+interface ContentAssignment {
+  deadline: string | null
+  grace_deadline: string | null
+  available_at: string | null
+  max_score_percentage: number
+}
+
+function useDeadlineCountdown(assignment: ContentAssignment | null) {
   const [timeLeft, setTimeLeft] = useState('')
-  const [expired, setExpired] = useState(false)
+  const [status, setStatus] = useState<'active' | 'urgent' | 'grace_period' | 'expired'>('active')
 
   useEffect(() => {
-    if (!deadline) return
+    if (!assignment?.deadline) return
     const tick = () => {
       const now = new Date().getTime()
-      const end = new Date(deadline).getTime()
-      const diff = end - now
-      if (diff <= 0) { setTimeLeft('Expired'); setExpired(true); return }
+      const deadlineTime = new Date(assignment.deadline!).getTime()
+      const graceTime = assignment.grace_deadline ? new Date(assignment.grace_deadline).getTime() : null
+
+      if (graceTime && now > graceTime) {
+        setTimeLeft('Closed')
+        setStatus('expired')
+        return
+      }
+
+      if (now > deadlineTime) {
+        // In grace period
+        if (graceTime) {
+          const diff = graceTime - now
+          const h = Math.floor(diff / 3600000)
+          const m = Math.floor((diff % 3600000) / 60000)
+          const s = Math.floor((diff % 60000) / 1000)
+          setTimeLeft(`Grace: ${h}h ${m}m ${s}s`)
+          setStatus('grace_period')
+        } else {
+          setTimeLeft('Expired')
+          setStatus('expired')
+        }
+        return
+      }
+
+      const diff = deadlineTime - now
       const h = Math.floor(diff / 3600000)
       const m = Math.floor((diff % 3600000) / 60000)
       const s = Math.floor((diff % 60000) / 1000)
       setTimeLeft(`${h}h ${m}m ${s}s`)
+      setStatus(diff < 3600000 ? 'urgent' : 'active')
     }
     tick()
     const interval = setInterval(tick, 1000)
     return () => clearInterval(interval)
-  }, [deadline])
+  }, [assignment])
 
-  return { timeLeft, expired }
+  return { timeLeft, status, isExpired: status === 'expired', isGracePeriod: status === 'grace_period' }
 }
 
 export default function LabPage() {
@@ -68,8 +102,9 @@ export default function LabPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState<any>(null)
+  const [assignment, setAssignment] = useState<ContentAssignment | null>(null)
   const sandboxRef = useRef<CodeSandboxHandle>(null)
-  const { timeLeft, expired } = useCountdown(lab?.deadline || null)
+  const { timeLeft, status: deadlineStatus, isExpired, isGracePeriod } = useDeadlineCountdown(assignment)
 
   useEffect(() => {
     if (!authLoading && !user) router.push('/auth/login')
@@ -94,8 +129,19 @@ export default function LabPage() {
       if (submissionData && submissionData.length > 0) {
         setSubmission(submissionData[0])
         setCode(submissionData[0].code || '')
-        setGithubUrl(submissionData[0].code?.startsWith('http') ? submissionData[0].code : '')
+        setGithubUrl(submissionData[0].github_url || (submissionData[0].code?.startsWith('http') ? submissionData[0].code : ''))
+        if (submissionData[0].submission_type === 'github') setSubmitMode('github')
       }
+
+      // Fetch content assignment for deadline info
+      const { data: assignData } = await supabase
+        .from('content_assignments')
+        .select('deadline, grace_deadline, available_at, max_score_percentage')
+        .eq('content_type', 'lab')
+        .eq('content_id', labId)
+        .eq('student_id', user?.id)
+        .single()
+      if (assignData) setAssignment(assignData)
     } catch (err) {
       console.error('Error fetching lab:', err)
       setError('Failed to load lab')
@@ -164,13 +210,22 @@ export default function LabPage() {
   return (
     <div className="min-h-screen">
       {/* Expired overlay */}
-      {expired && !submission && (
+      {isExpired && !submission && (
         <div className="fixed inset-0 z-50 bg-background/90 flex items-center justify-center">
           <div className="bg-card border border-destructive rounded-xl p-8 text-center max-w-md">
             <h2 className="text-2xl font-bold text-destructive mb-2">Deadline Passed</h2>
-            <p className="text-muted-foreground mb-4">The deadline for this lab has expired.</p>
+            <p className="text-muted-foreground mb-4">Both the deadline and the grace period for this lab have expired. No more submissions are accepted.</p>
             <Button onClick={() => router.back()}>Go Back</Button>
           </div>
+        </div>
+      )}
+
+      {/* Grace period warning banner */}
+      {isGracePeriod && (
+        <div className="bg-secondary/10 border-b border-secondary/30 px-4 py-3 text-center">
+          <p className="text-sm font-semibold text-secondary">
+            Late Submission Window -- Your score will be capped at 60% of the total. Time remaining: {timeLeft.replace('Grace: ', '')}
+          </p>
         </div>
       )}
 
@@ -183,9 +238,14 @@ export default function LabPage() {
             <p className="text-sm text-muted-foreground">Max Score: {lab.total_points} pts</p>
           </div>
           <div className="flex items-center gap-3">
-            {lab.deadline && !result && (
-              <div className={`text-sm font-mono font-bold px-3 py-1.5 rounded-lg border ${expired ? 'bg-destructive/10 border-destructive text-destructive' : 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-300'}`}>
-                {expired ? 'EXPIRED' : timeLeft}
+            {assignment?.deadline && !result && (
+              <div className={`text-sm font-mono font-bold px-3 py-1.5 rounded-lg border ${
+                isExpired ? 'bg-destructive/10 border-destructive text-destructive' :
+                isGracePeriod ? 'bg-secondary/10 border-secondary/30 text-secondary' :
+                deadlineStatus === 'urgent' ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-300' :
+                'bg-muted/50 border-border text-foreground'
+              }`}>
+                {timeLeft}
               </div>
             )}
           </div>
@@ -197,9 +257,13 @@ export default function LabPage() {
         {result && (
           <div className={`rounded-xl p-6 mb-6 border ${result.cheat_flagged ? 'bg-destructive/10 border-destructive/50' : result.score >= 70 ? 'bg-green-500/10 border-green-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}>
             <div className="flex items-center justify-between mb-2">
-              <h2 className={`text-xl font-bold ${result.cheat_flagged ? 'text-destructive' : result.score >= 70 ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
-                {result.cheat_flagged ? 'Integrity Warning' : result.score >= 70 ? 'Great Job!' : 'Needs Improvement'}
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className={`text-xl font-bold ${result.cheat_flagged ? 'text-destructive' : result.score >= 70 ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                  {result.cheat_flagged ? 'Integrity Warning' : result.score >= 70 ? 'Great Job!' : 'Needs Improvement'}
+                </h2>
+                {result.is_late && <span className="text-xs font-medium px-2 py-0.5 rounded bg-secondary/10 text-secondary">Late (60% max)</span>}
+                {result.submission_type === 'github' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-primary/10 text-primary">GitHub Scored</span>}
+              </div>
               <span className="text-2xl font-bold text-foreground">{result.scaled_grade}/{lab.total_points}</span>
             </div>
             {result.cheat_flagged && (
@@ -312,10 +376,12 @@ export default function LabPage() {
 
               <button
                 type="submit"
-                disabled={submitting || expired}
+                disabled={submitting || isExpired}
                 className="w-full inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
               >
-                {submitting ? 'Submitting & Scoring...' : submission ? 'Resubmit for Re-Grading' : 'Submit Lab for Auto-Grading'}
+                {submitting ? 'Submitting & Scoring...' :
+                 isGracePeriod ? (submission ? 'Resubmit (60% Max Score)' : 'Submit Lab (60% Max Score)') :
+                 submission ? 'Resubmit for Re-Grading' : 'Submit Lab for Auto-Grading'}
               </button>
             </form>
           </div>

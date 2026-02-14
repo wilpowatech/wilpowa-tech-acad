@@ -44,8 +44,9 @@ export async function GET(req: Request) {
 
   const avgQuizScore = quizCount > 0 ? Math.round(totalQuizScore / quizCount) : 0
   const avgLabScore = labCount > 0 ? Math.round(totalLabScore / labCount) : 0
-  const overallScore = (quizCount + labCount) > 0
-    ? Math.round((totalQuizScore + totalLabScore) / (quizCount + labCount))
+  // Daily scoring: 40% Quiz + 60% Lab
+  const overallScore = (quizCount > 0 || labCount > 0)
+    ? Math.round(avgQuizScore * 0.4 + avgLabScore * 0.6)
     : 0
 
   return NextResponse.json({
@@ -80,10 +81,15 @@ export async function POST(req: Request) {
     .eq('day_number', day_number)
     .limit(1)
 
-  const updates: any = {}
+  const updates: any = { updated_at: new Date().toISOString() }
   if (lecture_completed !== undefined) updates.lecture_completed = lecture_completed
   if (quiz_score !== undefined) updates.quiz_score = quiz_score
   if (lab_score !== undefined) updates.lab_score = lab_score
+
+  // Calculate overall_day_score using 40% Quiz + 60% Lab
+  const currentQuiz = quiz_score ?? 0
+  const currentLab = lab_score ?? 0
+  updates.overall_day_score = Math.round((currentQuiz * 0.4 + currentLab * 0.6) * 100) / 100
 
   let result
   if (existing && existing.length > 0) {

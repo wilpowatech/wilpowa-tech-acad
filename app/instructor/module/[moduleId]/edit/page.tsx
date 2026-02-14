@@ -17,7 +17,7 @@ interface QuizAnswer { id?: string; answer_text: string; is_correct: boolean; or
 interface QuizQuestion { id?: string; question_text: string; points: number; quiz_answers: QuizAnswer[] }
 interface Quiz { id: string; title: string; day_number: number | null; quiz_questions: QuizQuestion[] }
 interface Student { id: string; full_name: string; email: string }
-interface Assignment { student_id: string; day_number: number; available_at: string }
+interface Assignment { student_id: string; day_number: number; available_at: string; deadline: string | null; grace_deadline: string | null }
 
 const DAYS = [1, 2, 3, 4, 5]
 const OPTION_LABELS = ['A', 'B', 'C', 'D']
@@ -52,6 +52,7 @@ export default function ModuleEditPage() {
   const [quizForms, setQuizForms] = useState<Record<number, QuizQuestion[]>>({})
   const [selectedStudents, setSelectedStudents] = useState<Record<number, Set<string>>>({})
   const [scheduleDates, setScheduleDates] = useState<Record<number, string>>({})
+  const [deadlineDates, setDeadlineDates] = useState<Record<number, string>>({})
 
   // ─── Auth guard ───
   useEffect(() => {
@@ -94,6 +95,7 @@ export default function ModuleEditPage() {
       const qForms: typeof quizForms = {}
       const selStudents: typeof selectedStudents = {}
       const schDates: typeof scheduleDates = {}
+      const dlDates: typeof deadlineDates = {}
 
       for (const d of DAYS) {
         const lesson = (lessonsData.lessons || []).find((l: Lesson) => l.day_number === d)
@@ -127,6 +129,7 @@ export default function ModuleEditPage() {
         selStudents[d] = new Set(dayAssignments.map((a: Assignment) => a.student_id))
         if (dayAssignments.length > 0) {
           schDates[d] = dayAssignments[0].available_at?.slice(0, 16) || ''
+          dlDates[d] = dayAssignments[0].deadline?.slice(0, 16) || ''
         }
       }
 
@@ -135,6 +138,7 @@ export default function ModuleEditPage() {
       setQuizForms(qForms)
       setSelectedStudents(selStudents)
       setScheduleDates(schDates)
+      setDeadlineDates(dlDates)
     } catch (err) {
       console.error('Error fetching module data:', err)
     } finally {
@@ -302,6 +306,12 @@ export default function ModuleEditPage() {
         ? new Date(scheduleDates[day]).toISOString()
         : (() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d.toISOString() })()
 
+      const deadlineAt = deadlineDates[day]
+        ? new Date(deadlineDates[day]).toISOString()
+        : lessonForms[day]?.deadline
+          ? new Date(lessonForms[day].deadline).toISOString()
+          : null
+
       const res = await fetch('/api/assignments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -311,6 +321,7 @@ export default function ModuleEditPage() {
           course_id: mod?.course_id,
           student_ids: studentIds,
           available_at: availableAt,
+          deadline: deadlineAt,
         }),
       })
       const data = await res.json()
@@ -525,15 +536,46 @@ export default function ModuleEditPage() {
               <h2 className="text-lg font-bold text-foreground mb-4">Assign to Students</h2>
               <p className="text-xs text-muted-foreground mb-4">Select which students can access Day {activeDay} content. They will not see it until the scheduled date.</p>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Access Date & Time</label>
-                <input
-                  type="datetime-local"
-                  value={scheduleDates[activeDay] || ''}
-                  onChange={e => setScheduleDates(p => ({ ...p, [activeDay]: e.target.value }))}
-                  className="w-full px-3 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                />
-                <p className="text-xs text-muted-foreground mt-1">Default: today at 12:00 PM</p>
+              <div className="mb-4 space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Opens At (Access Date)</label>
+                  <input
+                    type="datetime-local"
+                    value={scheduleDates[activeDay] || ''}
+                    onChange={e => setScheduleDates(p => ({ ...p, [activeDay]: e.target.value }))}
+                    className="w-full px-3 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Students cannot access before this time</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Deadline (Expires At)</label>
+                  <input
+                    type="datetime-local"
+                    value={deadlineDates[activeDay] || ''}
+                    onChange={e => setDeadlineDates(p => ({ ...p, [activeDay]: e.target.value }))}
+                    className="w-full px-3 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Full score (100%) must be submitted by this time</p>
+                </div>
+                {/* Grace period info */}
+                {scheduleDates[activeDay] && deadlineDates[activeDay] && (
+                  <div className="rounded-lg border border-secondary/30 bg-secondary/5 px-3 py-2">
+                    <p className="text-xs font-semibold text-secondary mb-1">Auto Grace Period</p>
+                    <p className="text-xs text-muted-foreground">
+                      Late submissions accepted until{' '}
+                      <span className="text-foreground font-medium">
+                        {(() => {
+                          const avail = new Date(scheduleDates[activeDay])
+                          const dead = new Date(deadlineDates[activeDay])
+                          const duration = dead.getTime() - avail.getTime()
+                          const grace = new Date(dead.getTime() + duration)
+                          return grace.toLocaleString()
+                        })()}
+                      </span>{' '}
+                      with a maximum score of <span className="text-secondary font-semibold">60%</span>.
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2 mb-3">

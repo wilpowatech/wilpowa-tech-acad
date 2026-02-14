@@ -117,11 +117,16 @@ export default function StudentDashboard() {
     return now >= availableAt
   }
 
-  const getDeadlineStatus = (lesson: any) => {
-    if (!lesson?.deadline) return null
+  const getDeadlineStatus = (dayContent: DayContent) => {
+    const assignment = dayContent.assignment
+    if (!assignment?.deadline) return null
     const now = new Date()
-    const deadline = new Date(lesson.deadline)
+    const deadline = new Date(assignment.deadline)
+    const graceDeadline = assignment.grace_deadline ? new Date(assignment.grace_deadline) : null
     const diff = deadline.getTime() - now.getTime()
+
+    if (graceDeadline && now > graceDeadline) return 'fully_expired'
+    if (now > deadline && graceDeadline && now <= graceDeadline) return 'grace_period'
     if (diff <= 0) return 'expired'
     if (diff < 3600000) return 'urgent'
     return 'active'
@@ -208,7 +213,7 @@ export default function StudentDashboard() {
                                 if (!dc?.lesson && !dc?.assignment) return null
 
                                 const accessible = isAccessible(dc)
-                                const deadlineStatus = getDeadlineStatus(dc.lesson)
+                                const deadlineStatus = getDeadlineStatus(dc)
                                 const progress = dc.progress
 
                                 // Calculate day completion percentage
@@ -232,6 +237,8 @@ export default function StudentDashboard() {
                                         )}
                                       </div>
                                       <div className="flex items-center gap-2">
+                                        {deadlineStatus === 'fully_expired' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-destructive/10 text-destructive">Closed</span>}
+                                        {deadlineStatus === 'grace_period' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-secondary/10 text-secondary">Grace Period (60% max)</span>}
                                         {deadlineStatus === 'expired' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-destructive/10 text-destructive">Expired</span>}
                                         {deadlineStatus === 'urgent' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">Due Soon</span>}
                                         <span className="text-xs font-medium text-muted-foreground">{pct}%</span>
