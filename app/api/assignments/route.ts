@@ -59,22 +59,25 @@ export async function POST(req: Request) {
     .eq('module_id', module_id)
     .eq('day_number', day_number)
 
-  // Insert new assignments
-  const records = student_ids.map((sid: string) => {
-    const record: Record<string, any> = {
-      student_id: sid,
-      module_id,
-      day_number,
-      course_id,
-      available_at: resolvedAvailableAt,
-    }
-    // Only include deadline columns if deadline is provided
-    if (resolvedDeadline) {
-      record.deadline = resolvedDeadline
-      if (graceDeadline) record.grace_deadline = graceDeadline
-    }
-    return record
-  })
+  // Insert new assignments (one per student per content type: lesson, quiz, lab)
+  const contentTypes = ['lesson', 'quiz', 'lab']
+  const records = student_ids.flatMap((sid: string) =>
+    contentTypes.map(ct => {
+      const record: Record<string, any> = {
+        student_id: sid,
+        module_id,
+        day_number,
+        course_id,
+        content_type: ct,
+        available_at: resolvedAvailableAt,
+      }
+      if (resolvedDeadline) {
+        record.deadline = resolvedDeadline
+        if (graceDeadline) record.grace_deadline = graceDeadline
+      }
+      return record
+    })
+  )
 
   const { data, error } = await supabaseAdmin
     .from('content_assignments')

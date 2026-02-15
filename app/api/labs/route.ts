@@ -54,11 +54,15 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const body = await req.json()
-  const { id, ...updates } = body
+  const { id, max_score, ...rest } = body
 
   if (!id) {
     return NextResponse.json({ error: 'id is required' }, { status: 400 })
   }
+
+  // Map max_score to total_points (the actual DB column name)
+  const updates: Record<string, any> = { ...rest }
+  if (max_score !== undefined) updates.total_points = max_score
 
   const { data, error } = await supabaseAdmin
     .from('labs')

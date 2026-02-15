@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import Navbar from '@/components/navbar'
 import { CourseScoreCard } from '@/components/score-pie-chart'
+import { DeadlineCountdown, DeadlineBadge } from '@/components/deadline-countdown'
 
 interface Course { id: string; title: string; description: string }
 interface Enrollment { id: string; course: Course; start_date: string; status: string; student_id: string; course_id: string }
@@ -217,12 +218,15 @@ export default function StudentDashboard() {
                                 if (dc.lab) { total++; if (progress?.lab_score !== null && progress?.lab_score !== undefined) completed++ }
                                 const pct = total > 0 ? Math.round((completed / total) * 100) : 0
 
+                                const isUrgentOrExpired = deadlineStatus === 'urgent' || deadlineStatus === 'expired' || deadlineStatus === 'fully_expired'
+
                                 return (
-                                  <div key={day} className={`rounded-lg border p-4 transition-colors ${accessible ? 'border-border bg-background/40 hover:border-primary/30' : 'border-border/50 bg-muted/10 opacity-60'}`}>
+                                  <div key={day} className={`rounded-lg border p-4 transition-colors ${isUrgentOrExpired ? 'border-destructive/60 bg-destructive/5' : accessible ? 'border-border bg-background/40 hover:border-primary/30' : 'border-border/50 bg-muted/10 opacity-60'}`}>
                                     <div className="flex items-center justify-between mb-3">
                                       <div className="flex items-center gap-3">
-                                        <span className={`text-xs font-bold px-2 py-1 rounded ${accessible ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>Day {day}</span>
+                                        <span className={`text-xs font-bold px-2 py-1 rounded ${isUrgentOrExpired ? 'bg-destructive/10 text-destructive' : accessible ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>Day {day}</span>
                                         <span className="text-sm font-medium text-foreground">{dc.lesson?.title || `Day ${day}`}</span>
+                                        <DeadlineBadge deadline={dc.assignment?.deadline || null} graceDeadline={dc.assignment?.grace_deadline || null} />
                                         {!accessible && (
                                           <span className="text-xs text-muted-foreground">
                                             Available: {dc.assignment?.available_at ? new Date(dc.assignment.available_at).toLocaleString() : 'Not scheduled'}
@@ -230,10 +234,7 @@ export default function StudentDashboard() {
                                         )}
                                       </div>
                                       <div className="flex items-center gap-2">
-                                        {deadlineStatus === 'fully_expired' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-destructive/10 text-destructive">Closed</span>}
-                                        {deadlineStatus === 'grace_period' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-secondary/10 text-secondary">Grace Period (60% max)</span>}
-                                        {deadlineStatus === 'expired' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-destructive/10 text-destructive">Expired</span>}
-                                        {deadlineStatus === 'urgent' && <span className="text-xs font-medium px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">Due Soon</span>}
+                                        <DeadlineCountdown deadline={dc.assignment?.deadline || null} graceDeadline={dc.assignment?.grace_deadline || null} />
                                         <span className="text-xs font-medium text-muted-foreground">{pct}%</span>
                                         <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden">
                                           <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
