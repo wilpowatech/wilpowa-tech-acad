@@ -2,8 +2,8 @@ import { Login } from '@/components/auth/login'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Login - DevCourse Platform',
-  description: 'Login to your course account',
+  title: 'Login - Wilpowa Tech Academy',
+  description: 'Sign in to your Wilpowa Tech Academy account',
 }
 
 export default function LoginPage() {

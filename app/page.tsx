@@ -59,83 +59,90 @@ export default function Home() {
       icon: 'bootcamp',
       title: '12-Week Intensive',
       description: 'Complete curriculum with time-based progress tracking, daily lessons, and structured learning paths.',
-      href: user ? (profile?.role === 'student' ? '/student/dashboard' : '/instructor/dashboard') : '/auth/signup?role=student',
     },
     {
       icon: 'projects',
       title: 'Real-World Projects',
       description: 'Build portfolio-ready applications with hands-on labs and practical coding exercises.',
-      href: user ? (profile?.role === 'student' ? '/student/dashboard' : '/instructor/dashboard') : '/auth/signup?role=student',
     },
     {
       icon: 'assessment',
       title: 'Expert Assessment',
       description: '4 comprehensive exams with plagiarism detection and automated grading systems.',
-      href: user ? (profile?.role === 'student' ? '/student/dashboard' : '/instructor/dashboard') : '/auth/signup?role=student',
     },
     {
       icon: 'mentoring',
       title: 'Live Mentoring',
       description: 'Direct access to experienced instructors who guide you through every challenge.',
-      href: user ? (profile?.role === 'student' ? '/student/dashboard' : '/instructor/dashboard') : '/auth/signup?role=instructor',
     },
     {
       icon: 'certificates',
       title: 'Certificates',
       description: 'Earn verified completion certificates that showcase your skills to employers.',
-      href: user ? (profile?.role === 'student' ? '/student/certificates' : '/instructor/dashboard') : '/auth/signup?role=student',
     },
     {
       icon: 'career',
       title: 'Career Support',
       description: 'Job placement assistance, resume review, and interview preparation support.',
-      href: user ? (profile?.role === 'student' ? '/student/dashboard' : '/instructor/dashboard') : '/auth/signup?role=student',
     },
   ]
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden">
-        {/* Background image with light overlay */}
+    <div className="min-h-screen">
+      {/* HERO: Full bleed with dark image background */}
+      <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+        {/* Background image - NO overlay so the dark art shows fully */}
         <div className="absolute inset-0">
           <Image
-            src="/site-background.jpg"
+            src="/hero-bg.png"
             alt=""
             fill
-            className="object-cover"
+            className="object-cover object-center"
             priority
           />
-          <div className="absolute inset-0 bg-white/80" />
+          {/* Subtle gradient at bottom to transition into milky section */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#faf8f6] to-transparent" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
           <div className="mb-8">
             <Image
               src="/logo.png"
               alt="Wilpowa Tech Academy"
-              width={280}
-              height={78}
-              className="h-20 w-auto object-contain mx-auto"
+              width={320}
+              height={90}
+              className="h-24 w-auto object-contain mx-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
               priority
             />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 text-balance">
+          <h1
+            className="text-4xl md:text-6xl font-bold text-white mb-6 text-balance leading-tight"
+            style={{ textShadow: '0 2px 20px rgba(0,0,0,0.7), 0 0px 60px rgba(0,0,0,0.4)' }}
+          >
             Professional Software Development Bootcamp
           </h1>
-          <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto text-pretty leading-relaxed">
+          <p
+            className="text-lg md:text-xl text-white/90 mb-10 max-w-2xl mx-auto text-pretty leading-relaxed"
+            style={{ textShadow: '0 1px 12px rgba(0,0,0,0.6)' }}
+          >
             Master full-stack development in 12 weeks with real-world projects, hands-on labs, and expert instruction.
           </p>
 
           {!user && (
             <div className="flex justify-center gap-4 flex-wrap">
               <Link href="/auth/signup?role=student">
-                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 text-base shadow-lg shadow-primary/20">
+                <Button
+                  size="lg"
+                  className="bg-[var(--rosegold)] text-white hover:bg-[var(--rosegold-light)] px-8 py-3 text-base font-semibold shadow-xl shadow-black/20 hover:shadow-[0_0_20px_rgba(183,110,121,0.5)] transition-all duration-300"
+                >
                   Enroll as Student
                 </Button>
               </Link>
               <Link href="/auth/signup?role=instructor">
-                <Button size="lg" variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground px-8 py-3 text-base">
+                <Button
+                  size="lg"
+                  className="bg-white/15 text-white border-2 border-white/50 hover:bg-white/25 hover:border-white px-8 py-3 text-base font-semibold backdrop-blur-sm shadow-xl shadow-black/20 transition-all duration-300"
+                >
                   Become an Instructor
                 </Button>
               </Link>
@@ -144,42 +151,46 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl font-bold text-foreground mb-3 text-balance">Why Choose Wilpowa Tech Academy</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto text-pretty leading-relaxed">
-            Everything you need to launch your career in software development, all in one platform.
-          </p>
-        </div>
+      {/* WHY CHOOSE WILPOWA: milky/off-white background */}
+      <section id="about" className="bg-[#faf8f6] py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3 text-balance">Why Choose Wilpowa Tech Academy</h2>
+            <div className="w-16 h-1 bg-[var(--rosegold)] rounded-full mx-auto mb-4" />
+            <p className="text-muted-foreground max-w-xl mx-auto text-pretty leading-relaxed">
+              Everything you need to launch your career in software development, all in one platform.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, i) => (
-            <Link key={i} href={feature.href} className="group">
-              <div className="h-full bg-card border border-border rounded-xl p-6 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, i) => (
+              <div
+                key={i}
+                className="group h-full bg-white border border-[#e8e2dc] rounded-xl p-6 hover:border-[var(--rosegold)]/40 hover:shadow-lg hover:shadow-[var(--rosegold)]/5 transition-all duration-300"
+              >
                 <div className="flex items-start gap-4">
-                  <div className="shrink-0 h-14 w-14 rounded-lg bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                  <div className="shrink-0 h-14 w-14 rounded-lg bg-[var(--rosegold)]/8 flex items-center justify-center text-[var(--rosegold)] group-hover:bg-[var(--rosegold)] group-hover:text-white transition-all duration-300">
                     <FeatureIcon type={feature.icon} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold text-foreground mb-1.5 group-hover:text-primary transition-colors">{feature.title}</h3>
+                    <h3 className="text-base font-semibold text-foreground mb-1.5 group-hover:text-[var(--rosegold)] transition-colors">{feature.title}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
                   </div>
                 </div>
               </div>
-            </Link>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-muted/30">
+      <footer className="border-t border-[#e8e2dc] bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">Wilpowa Tech Academy. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <Link href="/#about" className="text-sm text-muted-foreground hover:text-primary transition-colors">About</Link>
-            <Link href="/auth/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">Sign In</Link>
-            <Link href="/auth/signup" className="text-sm text-muted-foreground hover:text-primary transition-colors">Sign Up</Link>
+            <Link href="/#about" className="text-sm text-muted-foreground hover:text-[var(--rosegold)] transition-colors">About</Link>
+            <Link href="/auth/login" className="text-sm text-muted-foreground hover:text-[var(--rosegold)] transition-colors">Sign In</Link>
+            <Link href="/auth/signup" className="text-sm text-muted-foreground hover:text-[var(--rosegold)] transition-colors">Sign Up</Link>
           </div>
         </div>
       </footer>

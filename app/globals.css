@@ -4,47 +4,49 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Clean White + Indigo/Rosegold Theme */
-  --background: #ffffff;
+  /* Milky White + Rosegold Theme */
+  --background: #faf8f6;
   --foreground: #1a1a2e;
   --card: #ffffff;
   --card-foreground: #1a1a2e;
   --popover: #ffffff;
   --popover-foreground: #1a1a2e;
-  --primary: #4f46e5;
+  --primary: #b76e79;
   --primary-foreground: #ffffff;
-  --secondary: #b76e79;
+  --secondary: #4f46e5;
   --secondary-foreground: #ffffff;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
+  --muted: #f3f0ed;
+  --muted-foreground: #6b6378;
+  --accent: #f3f0ed;
   --accent-foreground: #1a1a2e;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #f8fafc;
-  --ring: #4f46e5;
-  --chart-1: #4f46e5;
-  --chart-2: #b76e79;
+  --border: #e8e2dc;
+  --input: #faf8f6;
+  --ring: #b76e79;
+  --chart-1: #b76e79;
+  --chart-2: #4f46e5;
   --chart-3: #06b6d4;
   --chart-4: #10b981;
   --chart-5: #f59e0b;
   --radius: 0.625rem;
-  --sidebar: #f8fafc;
+  --sidebar: #faf8f6;
   --sidebar-foreground: #1a1a2e;
-  --sidebar-primary: #4f46e5;
+  --sidebar-primary: #b76e79;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f5f9;
+  --sidebar-accent: #f3f0ed;
   --sidebar-accent-foreground: #1a1a2e;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #4f46e5;
+  --sidebar-border: #e8e2dc;
+  --sidebar-ring: #b76e79;
 
-  /* Custom navbar colors */
-  --navbar: #312e81;
+  /* Navbar: rosegold */
+  --navbar: #b76e79;
   --navbar-foreground: #ffffff;
-  --navbar-hover: #4f46e5;
+  --navbar-hover: #d4a0a8;
+  --navbar-active: #a25c66;
   --rosegold: #b76e79;
   --rosegold-light: #d4a0a8;
+  --rosegold-dark: #9a5560;
 }
 
 @theme {
@@ -89,8 +91,10 @@
   --color-navbar: var(--navbar);
   --color-navbar-foreground: var(--navbar-foreground);
   --color-navbar-hover: var(--navbar-hover);
+  --color-navbar-active: var(--navbar-active);
   --color-rosegold: var(--rosegold);
   --color-rosegold-light: var(--rosegold-light);
+  --color-rosegold-dark: var(--rosegold-dark);
 }
 
 @layer base {
