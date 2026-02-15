@@ -52,6 +52,39 @@ export async function POST(req: Request) {
     graceDeadline = new Date(deadDate.getTime() + durationMs).toISOString()
   }
 
+  // Lookup actual content IDs for this module + day
+  const { data: lesson } = await supabaseAdmin
+    .from('lessons')
+    .select('id')
+    .eq('module_id', module_id)
+    .eq('day_number', day_number)
+    .single()
+
+  const { data: quiz } = await supabaseAdmin
+    .from('quizzes')
+    .select('id')
+    .eq('module_id', module_id)
+    .eq('day_number', day_number)
+    .single()
+
+  const { data: lab } = await supabaseAdmin
+    .from('labs')
+    .select('id')
+    .eq('module_id', module_id)
+    .eq('day_number', day_number)
+    .single()
+
+  // Build content items that actually exist for this day
+  const contentItems: { type: string; id: string }[] = []
+  if (lesson) contentItems.push({ type: 'lesson', id: lesson.id })
+  if (quiz) contentItems.push({ type: 'quiz', id: quiz.id })
+  if (lab) contentItems.push({ type: 'lab', id: lab.id })
+
+  // If no content exists yet, create a placeholder assignment with module_id as content_id
+  if (contentItems.length === 0) {
+    contentItems.push({ type: 'lesson', id: module_id })
+  }
+
   // Remove existing assignments for this module/day combo first
   await supabaseAdmin
     .from('content_assignments')
@@ -59,22 +92,25 @@ export async function POST(req: Request) {
     .eq('module_id', module_id)
     .eq('day_number', day_number)
 
-  // Insert new assignments
-  const records = student_ids.map((sid: string) => {
-    const record: Record<string, any> = {
-      student_id: sid,
-      module_id,
-      day_number,
-      course_id,
-      available_at: resolvedAvailableAt,
-    }
-    // Only include deadline columns if deadline is provided
-    if (resolvedDeadline) {
-      record.deadline = resolvedDeadline
-      if (graceDeadline) record.grace_deadline = graceDeadline
-    }
-    return record
-  })
+  // Insert one assignment per student per content item
+  const records = student_ids.flatMap((sid: string) =>
+    contentItems.map(ci => {
+      const record: Record<string, any> = {
+        student_id: sid,
+        module_id,
+        day_number,
+        course_id,
+        content_type: ci.type,
+        content_id: ci.id,
+        available_at: resolvedAvailableAt,
+      }
+      if (resolvedDeadline) {
+        record.deadline = resolvedDeadline
+        if (graceDeadline) record.grace_deadline = graceDeadline
+      }
+      return record
+    })
+  )
 
   const { data, error } = await supabaseAdmin
     .from('content_assignments')
