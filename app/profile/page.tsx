@@ -175,6 +175,7 @@ export default function ProfilePage() {
       setProfile(data.profile)
       setEditing(false)
       setMessage({ type: 'success', text: 'Profile updated successfully' })
+    window.dispatchEvent(new Event('profile-updated'))
     } catch {
       setMessage({ type: 'error', text: 'Failed to save profile' })
     } finally {
@@ -203,6 +204,8 @@ export default function ProfilePage() {
 
       setProfile(prev => prev ? { ...prev, avatar_url: data.avatar_url } : prev)
       setMessage({ type: 'success', text: 'Profile picture updated!' })
+      // Notify navbar to refresh profile (avatar in dropdown)
+      window.dispatchEvent(new Event('profile-updated'))
     } catch {
       setMessage({ type: 'error', text: 'Failed to upload profile picture' })
     } finally {

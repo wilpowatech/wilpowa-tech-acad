@@ -59,24 +59,31 @@ export async function POST(req: Request) {
     .eq('module_id', module_id)
     .eq('day_number', day_number)
 
-  // Insert new assignments with deadline and grace period
-  const records = student_ids.map((sid: string) => ({
-    student_id: sid,
-    module_id,
-    day_number,
-    course_id,
-    available_at: resolvedAvailableAt,
-    deadline: resolvedDeadline,
-    grace_deadline: graceDeadline,
-    max_score_percentage: 100,
-    status: 'active',
-  }))
+  // Insert new assignments
+  const records = student_ids.map((sid: string) => {
+    const record: Record<string, any> = {
+      student_id: sid,
+      module_id,
+      day_number,
+      course_id,
+      available_at: resolvedAvailableAt,
+    }
+    // Only include deadline columns if deadline is provided
+    if (resolvedDeadline) {
+      record.deadline = resolvedDeadline
+      if (graceDeadline) record.grace_deadline = graceDeadline
+    }
+    return record
+  })
 
   const { data, error } = await supabaseAdmin
     .from('content_assignments')
     .insert(records)
     .select()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[v0] Assignments insert error:', error.message, error.details, error.hint)
+    return NextResponse.json({ error: error.message, details: error.details, hint: error.hint }, { status: 500 })
+  }
   return NextResponse.json({ assignments: data, grace_deadline: graceDeadline })
 }
