@@ -70,7 +70,7 @@ export function Login() {
         <p className="text-muted-foreground">Professional Software Development Platform</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-card/80 p-8 rounded-xl border border-border">
+      <form onSubmit={handleSubmit} className="space-y-6 bg-card p-8 rounded-xl border border-border shadow-sm">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">
             Email
