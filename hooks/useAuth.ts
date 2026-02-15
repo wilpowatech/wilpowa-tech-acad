@@ -9,6 +9,13 @@ interface UserProfile {
   email: string
   full_name: string
   role: 'admin' | 'instructor' | 'student'
+  avatar_url?: string | null
+  github_url?: string | null
+  phone?: string | null
+  sex?: string | null
+  country?: string | null
+  date_of_birth?: string | null
+  bio?: string | null
 }
 
 export function useAuth() {
@@ -62,7 +69,24 @@ export function useAuth() {
       }
     })
 
-    return () => subscription.unsubscribe()
+    // Listen for profile update events (e.g. after avatar upload)
+    const handleProfileUpdate = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        const { data } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+        setProfile(data as UserProfile)
+      }
+    }
+    window.addEventListener('profile-updated', handleProfileUpdate)
+
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener('profile-updated', handleProfileUpdate)
+    }
   }, [])
 
   return { user, profile, loading, error }
