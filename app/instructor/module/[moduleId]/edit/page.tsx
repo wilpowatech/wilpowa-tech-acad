@@ -52,7 +52,7 @@ export default function ModuleEditPage() {
   const [quizForms, setQuizForms] = useState<Record<number, QuizQuestion[]>>({})
   const [selectedStudents, setSelectedStudents] = useState<Record<number, Set<string>>>({})
   const [scheduleDates, setScheduleDates] = useState<Record<number, string>>({})
-  const [deadlineDates, setDeadlineDates] = useState<Record<number, string>>({})
+  const [deadlineHours, setDeadlineHours] = useState<Record<number, number>>({})
 
   // ─── Auth guard ───
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function ModuleEditPage() {
       const qForms: typeof quizForms = {}
       const selStudents: typeof selectedStudents = {}
       const schDates: typeof scheduleDates = {}
-      const dlDates: typeof deadlineDates = {}
+      const dlHours: typeof deadlineHours = {}
 
       for (const d of DAYS) {
         const lesson = (lessonsData.lessons || []).find((l: Lesson) => l.day_number === d)
@@ -129,7 +129,13 @@ export default function ModuleEditPage() {
         selStudents[d] = new Set(dayAssignments.map((a: Assignment) => a.student_id))
         if (dayAssignments.length > 0) {
           schDates[d] = dayAssignments[0].available_at?.slice(0, 16) || ''
-          dlDates[d] = dayAssignments[0].deadline?.slice(0, 16) || ''
+          if (dayAssignments[0].available_at && dayAssignments[0].deadline) {
+            const avail = new Date(dayAssignments[0].available_at).getTime()
+            const dead = new Date(dayAssignments[0].deadline).getTime()
+            dlHours[d] = Math.max(1, Math.round((dead - avail) / 3600000))
+          } else {
+            dlHours[d] = 24
+          }
         }
       }
 
@@ -138,7 +144,7 @@ export default function ModuleEditPage() {
       setQuizForms(qForms)
       setSelectedStudents(selStudents)
       setScheduleDates(schDates)
-      setDeadlineDates(dlDates)
+      setDeadlineHours(dlHours)
     } catch (err) {
       console.error('Error fetching module data:', err)
     } finally {
@@ -306,11 +312,11 @@ export default function ModuleEditPage() {
         ? new Date(scheduleDates[day]).toISOString()
         : (() => { const d = new Date(); d.setHours(12, 0, 0, 0); return d.toISOString() })()
 
-      const deadlineAt = deadlineDates[day]
-        ? new Date(deadlineDates[day]).toISOString()
-        : lessonForms[day]?.deadline
-          ? new Date(lessonForms[day].deadline).toISOString()
-          : null
+      // Calculate deadline from access date + hours
+      const hours = deadlineHours[day] || 24
+      const deadlineDate = new Date(availableAt)
+      deadlineDate.setTime(deadlineDate.getTime() + hours * 3600000)
+      const deadlineAt = deadlineDate.toISOString()
 
       const res = await fetch('/api/assignments', {
         method: 'POST',
@@ -538,42 +544,42 @@ export default function ModuleEditPage() {
 
               <div className="mb-4 space-y-3">
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">Opens At (Access Date)</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Access Date & Time</label>
                   <input
                     type="datetime-local"
                     value={scheduleDates[activeDay] || ''}
                     onChange={e => setScheduleDates(p => ({ ...p, [activeDay]: e.target.value }))}
                     className="w-full px-3 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">Students cannot access before this time</p>
+                  <p className="text-xs text-muted-foreground mt-1">Students can access from this date/time</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-1">Deadline (Expires At)</label>
-                  <input
-                    type="datetime-local"
-                    value={deadlineDates[activeDay] || ''}
-                    onChange={e => setDeadlineDates(p => ({ ...p, [activeDay]: e.target.value }))}
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Deadline (hours after access)</label>
+                  <select
+                    value={deadlineHours[activeDay] || 24}
+                    onChange={e => setDeadlineHours(p => ({ ...p, [activeDay]: parseInt(e.target.value) }))}
                     className="w-full px-3 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Full score (100%) must be submitted by this time</p>
+                  >
+                    {[2, 4, 6, 8, 12, 18, 24, 36, 48, 72].map(h => (
+                      <option key={h} value={h}>{h} hours</option>
+                    ))}
+                  </select>
                 </div>
-                {/* Grace period info */}
-                {scheduleDates[activeDay] && deadlineDates[activeDay] && (
-                  <div className="rounded-lg border border-secondary/30 bg-secondary/5 px-3 py-2">
-                    <p className="text-xs font-semibold text-secondary mb-1">Auto Grace Period</p>
-                    <p className="text-xs text-muted-foreground">
-                      Late submissions accepted until{' '}
-                      <span className="text-foreground font-medium">
-                        {(() => {
-                          const avail = new Date(scheduleDates[activeDay])
-                          const dead = new Date(deadlineDates[activeDay])
-                          const duration = dead.getTime() - avail.getTime()
-                          const grace = new Date(dead.getTime() + duration)
-                          return grace.toLocaleString()
-                        })()}
-                      </span>{' '}
-                      with a maximum score of <span className="text-secondary font-semibold">60%</span>.
-                    </p>
+                {scheduleDates[activeDay] && (
+                  <div className="rounded-lg border border-border bg-background/50 px-3 py-2 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Deadline</span>
+                      <span className="text-xs font-medium text-foreground">
+                        {new Date(new Date(scheduleDates[activeDay]).getTime() + (deadlineHours[activeDay] || 24) * 3600000).toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] uppercase tracking-wider text-secondary">Grace ends</span>
+                      <span className="text-xs font-medium text-secondary">
+                        {new Date(new Date(scheduleDates[activeDay]).getTime() + (deadlineHours[activeDay] || 24) * 2 * 3600000).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">Late submissions: max 60% score until grace ends.</p>
                   </div>
                 )}
               </div>
