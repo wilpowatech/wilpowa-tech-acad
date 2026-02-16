@@ -66,11 +66,12 @@ export default function Navbar() {
           <Image
             src="/logo.png"
             alt="Wilpowa Tech Academy"
-            width={240}
-            height={64}
-            className="h-14 w-auto object-contain drop-shadow-md"
+            width={56}
+            height={56}
+            className="h-12 w-auto object-contain drop-shadow-md"
             priority
           />
+          <span className="text-white font-bold text-lg tracking-wide hidden sm:inline">Wilpowa Tech Academy</span>
         </Link>
 
         {/* Center: Nav Links (desktop) */}
