@@ -81,9 +81,6 @@ function formatTime(ms: number): string {
   return `${s}s`
 }
 
-/**
- * A compact badge that turns red when deadline approaches
- */
 export function DeadlineBadge({ deadline, graceDeadline }: DeadlineCountdownProps) {
   const [status, setStatus] = useState<'ok' | 'urgent' | 'grace' | 'expired'>('ok')
 
@@ -99,27 +96,22 @@ export function DeadlineBadge({ deadline, graceDeadline }: DeadlineCountdownProp
       setStatus('ok')
     }
     tick()
-    const interval = setInterval(tick, 5000)
+    const interval = setInterval(tick, 30000)
     return () => clearInterval(interval)
   }, [deadline, graceDeadline])
 
   if (!deadline || status === 'ok') return null
 
-  const styles = {
-    urgent: 'bg-destructive text-white',
-    grace: 'bg-secondary text-secondary-foreground',
-    expired: 'bg-destructive/80 text-white',
+  const config = {
+    urgent: { label: 'Due Soon', className: 'bg-amber-500/10 text-amber-600 border-amber-500/30' },
+    grace: { label: 'Grace Period', className: 'bg-secondary/10 text-secondary border-secondary/30' },
+    expired: { label: 'Closed', className: 'bg-destructive/10 text-destructive border-destructive/30' },
   }
 
-  const text = {
-    urgent: 'DUE SOON',
-    grace: 'LATE (60%)',
-    expired: 'CLOSED',
-  }
-
+  const c = config[status]
   return (
-    <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${styles[status]}`}>
-      {text[status]}
+    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border ${c.className}`}>
+      {c.label}
     </span>
   )
 }

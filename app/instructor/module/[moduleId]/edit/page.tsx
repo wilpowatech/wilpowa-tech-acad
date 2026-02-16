@@ -52,6 +52,7 @@ export default function ModuleEditPage() {
   const [quizForms, setQuizForms] = useState<Record<number, QuizQuestion[]>>({})
   const [selectedStudents, setSelectedStudents] = useState<Record<number, Set<string>>>({})
   const [scheduleDates, setScheduleDates] = useState<Record<number, string>>({})
+  const [deadlineHours, setDeadlineHours] = useState<Record<number, number>>({})
   const [deadlineHours, setDeadlineHours] = useState<Record<number, number>>({})  // hours until deadline from access date
 
   // ─── Auth guard ───
@@ -129,11 +130,10 @@ export default function ModuleEditPage() {
         selStudents[d] = new Set(dayAssignments.map((a: Assignment) => a.student_id))
         if (dayAssignments.length > 0) {
           schDates[d] = dayAssignments[0].available_at?.slice(0, 16) || ''
-          // Compute hours from available_at to deadline
           if (dayAssignments[0].available_at && dayAssignments[0].deadline) {
             const avail = new Date(dayAssignments[0].available_at).getTime()
             const dead = new Date(dayAssignments[0].deadline).getTime()
-            dlHours[d] = Math.round((dead - avail) / 3600000)
+            dlHours[d] = Math.max(1, Math.round((dead - avail) / 3600000))
           } else {
             dlHours[d] = 24
           }
@@ -555,7 +555,6 @@ export default function ModuleEditPage() {
                     ))}
                   </select>
                 </div>
-                {/* Computed deadline & grace info */}
                 {scheduleDates[activeDay] && (
                   <div className="rounded-lg border border-border bg-background/50 px-3 py-2 space-y-1">
                     <div className="flex items-center justify-between">
