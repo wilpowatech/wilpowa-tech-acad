@@ -420,18 +420,7 @@ export default function ModuleEditPage() {
                   <label className="block text-sm font-medium text-muted-foreground mb-1">Content (Markdown)</label>
                   <textarea value={dayForm.content} onChange={e => setLessonForms(p => ({ ...p, [activeDay]: { ...p[activeDay], content: e.target.value } }))} rows={8} className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm" placeholder="Write lecture content here..." />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-1">Available From (Date & Time)</label>
-                    <input type="datetime-local" value={dayForm.scheduled_at} onChange={e => setLessonForms(p => ({ ...p, [activeDay]: { ...p[activeDay], scheduled_at: e.target.value } }))} className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm" />
-                    <p className="text-xs text-muted-foreground mt-1">Students cannot access before this date/time</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-1">Deadline (Date & Time)</label>
-                    <input type="datetime-local" value={dayForm.deadline} onChange={e => setLessonForms(p => ({ ...p, [activeDay]: { ...p[activeDay], deadline: e.target.value } }))} className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm" />
-                    <p className="text-xs text-muted-foreground mt-1">Quiz and lab must be submitted before this time</p>
-                  </div>
-                </div>
+                {/* Scheduling is managed in the "Assign to Students" panel on the right */}
               </div>
             </div>
 
