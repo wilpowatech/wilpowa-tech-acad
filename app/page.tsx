@@ -109,9 +109,9 @@ export default function Home() {
             <Image
               src="/logo.png"
               alt="Wilpowa Tech Academy"
-              width={320}
-              height={90}
-              className="h-24 w-auto object-contain mx-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
+              width={200}
+              height={200}
+              className="h-40 w-auto object-contain mx-auto drop-shadow-[0_2px_20px_rgba(0,0,0,0.6)]"
               priority
             />
           </div>

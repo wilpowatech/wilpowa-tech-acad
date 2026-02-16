@@ -62,9 +62,9 @@ export function Login() {
         <Image
           src="/logo.png"
           alt="Wilpowa Tech Academy"
-          width={240}
-          height={66}
-          className="h-16 w-auto object-contain mb-3"
+          width={120}
+          height={120}
+          className="h-24 w-auto object-contain mb-3"
           priority
         />
         <p className="text-muted-foreground">Professional Software Development Platform</p>
