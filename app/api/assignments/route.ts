@@ -95,6 +95,10 @@ export async function POST(req: Request) {
   // Insert one assignment per student per content item
   const records = student_ids.flatMap((sid: string) =>
     contentItems.map(ci => {
+  // Insert new assignments (one per student per content type: lesson, quiz, lab)
+  const contentTypes = ['lesson', 'quiz', 'lab']
+  const records = student_ids.flatMap((sid: string) =>
+    contentTypes.map(ct => {
       const record: Record<string, any> = {
         student_id: sid,
         module_id,
@@ -102,6 +106,7 @@ export async function POST(req: Request) {
         course_id,
         content_type: ci.type,
         content_id: ci.id,
+        content_type: ct,
         available_at: resolvedAvailableAt,
       }
       if (resolvedDeadline) {

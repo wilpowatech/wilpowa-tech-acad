@@ -26,6 +26,7 @@ export function DeadlineCountdown({ deadline, graceDeadline }: DeadlineCountdown
       }
 
       if (now > deadMs) {
+        // In grace period
         if (graceMs) {
           const diff = graceMs - now
           setTimeLeft(formatTime(diff))
