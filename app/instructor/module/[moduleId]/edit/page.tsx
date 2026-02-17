@@ -52,7 +52,6 @@ export default function ModuleEditPage() {
   const [quizForms, setQuizForms] = useState<Record<number, QuizQuestion[]>>({})
   const [selectedStudents, setSelectedStudents] = useState<Record<number, Set<string>>>({})
   const [scheduleDates, setScheduleDates] = useState<Record<number, string>>({})
-  const [deadlineHours, setDeadlineHours] = useState<Record<number, number>>({})
   const [deadlineHours, setDeadlineHours] = useState<Record<number, number>>({})  // hours until deadline from access date
 
   // ─── Auth guard ───
