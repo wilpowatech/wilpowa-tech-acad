@@ -197,7 +197,7 @@ export default function ContentManager() {
               <p className="text-muted-foreground text-sm">Labs (1 per week)</p>
             </div>
             <div className="bg-card border border-border rounded-lg p-6">
-              <div className="text-[#00ff88] text-2xl font-bold">4</div>
+              <div className="text-secondary text-2xl font-bold">4</div>
               <p className="text-muted-foreground text-sm">Exams</p>
             </div>
           </div>

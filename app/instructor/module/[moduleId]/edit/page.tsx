@@ -10,7 +10,7 @@ import Link from 'next/link'
 
 // ─── Types ───
 interface Module { id: string; week_number: number; title: string; course_id: string }
-interface Lesson { id: string; title: string; content: string; description: string; day_number: number; module_id: string; deadline: string | null; scheduled_at: string | null; available_at: string | null }
+interface Lesson { id: string; title: string; content: string; description: string; video_url: string | null; day_number: number; module_id: string; deadline: string | null; scheduled_at: string | null; available_at: string | null }
 interface Lab { id: string; title: string; instructions: string; github_repo_url: string | null; sandbox_url: string | null; total_points: number; day_number: number | null; deadline: string | null; module_id: string }
 interface QuizAnswer { id?: string; answer_text: string; is_correct: boolean; order_number: number }
 interface QuizQuestion { id?: string; question_text: string; points: number; quiz_answers: QuizAnswer[] }
@@ -46,7 +46,7 @@ export default function ModuleEditPage() {
   const [saveMsg, setSaveMsg] = useState<Record<string, string>>({})
 
   // Per-day form state
-  const [lessonForms, setLessonForms] = useState<Record<number, { title: string; description: string; content: string; scheduled_at: string; deadline: string }>>({})
+  const [lessonForms, setLessonForms] = useState<Record<number, { title: string; description: string; content: string; video_url: string; scheduled_at: string; deadline: string }>>({})
   const [labForms, setLabForms] = useState<Record<number, { title: string; instructions: string; github_repo_url: string; sandbox_url: string; total_points: number }>>({})
   const [quizForms, setQuizForms] = useState<Record<number, QuizQuestion[]>>({})
   const [selectedStudents, setSelectedStudents] = useState<Record<number, Set<string>>>({})
@@ -102,6 +102,7 @@ export default function ModuleEditPage() {
           title: lesson?.title || '',
           description: lesson?.description || '',
           content: lesson?.content || '',
+          video_url: lesson?.video_url || '',
           scheduled_at: lesson?.scheduled_at ? lesson.scheduled_at.slice(0, 16) : '',
           deadline: lesson?.deadline ? lesson.deadline.slice(0, 16) : '',
         }
@@ -188,6 +189,7 @@ export default function ModuleEditPage() {
         title: form.title,
         description: form.description,
         content: form.content,
+        video_url: form.video_url || null,
         scheduled_at: form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null,
         deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
         available_at: form.scheduled_at ? new Date(form.scheduled_at).toISOString() : null,
@@ -357,7 +359,7 @@ export default function ModuleEditPage() {
 
   if (!mod) return null
 
-  const dayForm = lessonForms[activeDay] || { title: '', description: '', content: '', scheduled_at: '', deadline: '' }
+  const dayForm = lessonForms[activeDay] || { title: '', description: '', content: '', video_url: '', scheduled_at: '', deadline: '' }
   const dayLab = labForms[activeDay] || { title: '', instructions: '', github_repo_url: '', sandbox_url: '', total_points: 100 }
   const dayQuiz = quizForms[activeDay] || emptyQuestions()
   const dayStudents = selectedStudents[activeDay] || new Set()
@@ -413,6 +415,16 @@ export default function ModuleEditPage() {
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-1">Description</label>
                   <input type="text" value={dayForm.description} onChange={e => setLessonForms(p => ({ ...p, [activeDay]: { ...p[activeDay], description: e.target.value } }))} className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Brief description..." />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">
+                    <span className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-secondary" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
+                      Video URL (YouTube, Vimeo, or direct link - max 10 min)
+                    </span>
+                  </label>
+                  <input type="url" value={dayForm.video_url} onChange={e => setLessonForms(p => ({ ...p, [activeDay]: { ...p[activeDay], video_url: e.target.value } }))} className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-sm" placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." />
+                  <p className="text-xs text-muted-foreground mt-1">Paste a YouTube or Vimeo link. Students will see an embedded player on the lesson page.</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-1">Content (Markdown)</label>

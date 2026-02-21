@@ -52,13 +52,13 @@ export function Signup() {
   return (
     <div className="w-full max-w-md space-y-8">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-white mb-2">DevCourse</h1>
-        <p className="text-gray-400">Join Our Software Development Platform</p>
+        <h1 className="text-4xl font-bold text-foreground mb-2">Wilpowa Tech Academy</h1>
+        <p className="text-muted-foreground">Join Our Software Development Platform</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5 bg-slate-800 p-8 rounded-xl border border-slate-700">
+      <form onSubmit={handleSubmit} className="space-y-5 bg-card p-8 rounded-xl border border-border shadow-sm">
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="fullName" className="block text-sm font-medium text-muted-foreground mb-2">
             Full Name
           </label>
           <Input
@@ -68,12 +68,12 @@ export function Signup() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
-            className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-500"
+            className="bg-input border-border text-foreground placeholder:text-muted-foreground/50"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-muted-foreground mb-2">
             Email
           </label>
           <Input
@@ -83,49 +83,49 @@ export function Signup() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-500"
+            className="bg-input border-border text-foreground placeholder:text-muted-foreground/50"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="password" className="block text-sm font-medium text-muted-foreground mb-2">
             Password
           </label>
           <Input
             id="password"
             type="password"
-            placeholder="••••••••"
+            placeholder="********"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-500"
+            className="bg-input border-border text-foreground placeholder:text-muted-foreground/50"
           />
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-muted-foreground mb-2">
             Confirm Password
           </label>
           <Input
             id="confirmPassword"
             type="password"
-            placeholder="••••••••"
+            placeholder="********"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="bg-slate-700 border-slate-600 text-white placeholder:text-gray-500"
+            className="bg-input border-border text-foreground placeholder:text-muted-foreground/50"
           />
         </div>
 
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="role" className="block text-sm font-medium text-muted-foreground mb-2">
             I am a
           </label>
           <select
             id="role"
             value={role}
             onChange={(e) => setRole(e.target.value as 'student' | 'instructor')}
-            className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="student">Student</option>
             <option value="instructor">Instructor</option>
@@ -133,7 +133,7 @@ export function Signup() {
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-destructive/10 border border-destructive/50 text-destructive px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}
@@ -141,14 +141,14 @@ export function Signup() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2"
+          className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold py-2"
         >
           {loading ? 'Creating Account...' : 'Sign Up'}
         </Button>
 
-        <p className="text-center text-gray-400 text-sm">
+        <p className="text-center text-muted-foreground text-sm">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-blue-400 hover:text-blue-300 font-semibold">
+          <Link href="/auth/login" className="text-primary hover:text-primary/80 font-semibold">
             Sign in
           </Link>
         </p>

@@ -260,7 +260,7 @@ export default function ProfilePage() {
         {message && (
           <div className={`px-4 py-3 rounded-lg text-sm font-medium ${
             message.type === 'success'
-              ? 'bg-[#00ff88]/10 text-[#00ff88] border border-[#00ff88]/20'
+              ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
               : 'bg-destructive/10 text-destructive border border-destructive/20'
           }`}>
             {message.text}
@@ -526,7 +526,7 @@ export default function ProfilePage() {
                               className="h-full rounded-full transition-all"
                               style={{
                                 width: `${cp.overallScore}%`,
-                                background: cp.overallScore >= 70 ? '#00ff88' : cp.overallScore >= 50 ? '#ffd700' : '#ff4444'
+                                background: cp.overallScore >= 70 ? '#10b981' : cp.overallScore >= 50 ? '#f59e0b' : '#ef4444'
                               }}
                             />
                           </div>

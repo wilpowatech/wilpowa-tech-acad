@@ -26,7 +26,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { module_id, day_number, title, content, description, deadline, scheduled_at, available_at } = body
+  const { module_id, day_number, title, content, description, video_url, deadline, scheduled_at, available_at } = body
 
   if (!module_id || !day_number || !title) {
     return NextResponse.json({ error: 'module_id, day_number, and title are required' }, { status: 400 })
@@ -40,6 +40,7 @@ export async function POST(req: Request) {
       title,
       content: content || '',
       description: description || '',
+      video_url: video_url || null,
       deadline: deadline || null,
       scheduled_at: scheduled_at || null,
       available_at: available_at || null,

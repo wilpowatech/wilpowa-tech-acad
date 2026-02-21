@@ -38,7 +38,7 @@ export default function ForgotPassword() {
   return (
     <div className="w-full max-w-md mx-auto space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h1 className="text-3xl font-bold text-foreground">
           Reset Password
         </h1>
         <p className="text-muted-foreground mt-2">
@@ -77,7 +77,7 @@ export default function ForgotPassword() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-primary-foreground font-semibold hover:opacity-90 disabled:opacity-50 transition"
+          className="w-full py-2 rounded-lg bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 disabled:opacity-50 transition"
         >
           {loading ? 'Sending...' : 'Send Reset Link'}
         </button>
