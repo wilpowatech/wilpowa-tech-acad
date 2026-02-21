@@ -13,11 +13,25 @@ interface Lesson {
   title: string
   description: string
   content: string
+  video_url: string | null
   day_number: number
   module_id: string
   scheduled_at: string | null
   available_at: string | null
   deadline: string | null
+}
+
+function getEmbedUrl(url: string): string | null {
+  if (!url) return null
+  // YouTube
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}?rel=0`
+  // Vimeo
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/)
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`
+  // Direct video URL (mp4, webm, etc.)
+  if (url.match(/\.(mp4|webm|ogg)(\?|$)/i)) return url
+  return null
 }
 
 export default function StudentLessonPage() {
@@ -147,6 +161,40 @@ export default function StudentLessonPage() {
         {lesson.description && (
           <p className="text-muted-foreground mb-6 text-lg leading-relaxed">{lesson.description}</p>
         )}
+
+        {/* Video Player */}
+        {lesson.video_url && (() => {
+          const embedUrl = getEmbedUrl(lesson.video_url)
+          if (!embedUrl) return null
+          const isDirect = embedUrl.match(/\.(mp4|webm|ogg)(\?|$)/i)
+          return (
+            <div className="mb-8">
+              <div className="rounded-xl overflow-hidden border border-border bg-primary shadow-lg">
+                {isDirect ? (
+                  <video
+                    controls
+                    controlsList="nodownload"
+                    className="w-full aspect-video"
+                    preload="metadata"
+                  >
+                    <source src={embedUrl} />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <iframe
+                    src={embedUrl}
+                    className="w-full aspect-video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={`Video: ${lesson.title}`}
+                  />
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 text-center">Watch the lecture video above, then review the notes below.</p>
+            </div>
+          )
+        })()}
+
         <article className="prose prose-invert max-w-none">
           <div className="text-foreground whitespace-pre-wrap leading-relaxed">{lesson.content}</div>
         </article>

@@ -1,13 +1,13 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Inter, Geist_Mono } from 'next/font/google'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { Analytics } from '@vercel/analytics/next'
 
 import './globals.css'
 import Navbar from '@/components/navbar'
 
-const _geist = Geist({ subsets: ["latin"] });
+const _inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#b76e79',
+  themeColor: '#1a1f36',
   width: 'device-width',
   initialScale: 1,
 }

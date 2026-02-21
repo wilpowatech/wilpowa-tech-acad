@@ -16,8 +16,8 @@ export function ScorePieChart({ score, label, size = 120 }: ScorePieChartProps) 
   ]
 
   // Color based on score
-  const scoreColor = score >= 70 ? '#00ff88' : score >= 50 ? '#ffd700' : '#ff4444'
-  const remainingColor = '#2a3050'
+  const scoreColor = score >= 70 ? '#10b981' : score >= 50 ? '#f59e0b' : '#ef4444'
+  const remainingColor = '#e2e5ed'
 
   return (
     <div className="flex flex-col items-center gap-1">
@@ -61,9 +61,9 @@ interface CourseScoreCardProps {
 export function CourseScoreCard({ courseTitle, overallScore, quizScore, labScore, completedDays, totalDays }: CourseScoreCardProps) {
   const completionPct = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0
   const data = [
-    { name: 'Quiz (40%)', value: quizScore * 0.4, color: '#00d4ff' },
-    { name: 'Lab (60%)', value: labScore * 0.6, color: '#ffd700' },
-    { name: 'Remaining', value: Math.max(0, 100 - (quizScore * 0.4 + labScore * 0.6)), color: '#2a3050' },
+    { name: 'Quiz (40%)', value: quizScore * 0.4, color: '#0d9488' },
+    { name: 'Lab (60%)', value: labScore * 0.6, color: '#f59e0b' },
+    { name: 'Remaining', value: Math.max(0, 100 - (quizScore * 0.4 + labScore * 0.6)), color: '#e2e5ed' },
   ]
 
   return (
@@ -104,12 +104,12 @@ export function CourseScoreCard({ courseTitle, overallScore, quizScore, labScore
             <span className="text-xs font-bold text-foreground ml-auto">{quizScore}%</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full" style={{ background: '#ffd700' }} />
+            <div className="w-2 h-2 rounded-full" style={{ background: '#f59e0b' }} />
             <span className="text-xs text-muted-foreground">Lab avg:</span>
             <span className="text-xs font-bold text-foreground ml-auto">{labScore}%</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full" style={{ background: '#00ff88' }} />
+            <div className="w-2 h-2 rounded-full" style={{ background: '#10b981' }} />
             <span className="text-xs text-muted-foreground">Progress:</span>
             <span className="text-xs font-bold text-foreground ml-auto">{completedDays}/{totalDays} days ({completionPct}%)</span>
           </div>

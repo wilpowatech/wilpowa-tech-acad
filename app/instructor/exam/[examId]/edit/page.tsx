@@ -85,7 +85,6 @@ export default function ExamEditorPage() {
     e.preventDefault()
 
     try {
-      // Check that at least one answer is marked as correct
       const hasCorrectAnswer = formData.answers.some((a) => a.is_correct && a.text.trim())
 
       if (!hasCorrectAnswer) {
@@ -93,7 +92,6 @@ export default function ExamEditorPage() {
         return
       }
 
-      // Insert question
       const { data: questionData, error: questionError } = await supabase
         .from('exam_questions')
         .insert({
@@ -107,7 +105,6 @@ export default function ExamEditorPage() {
 
       if (questionError) throw questionError
 
-      // Insert answers
       for (let i = 0; i < formData.answers.length; i++) {
         if (formData.answers[i].text.trim()) {
           await supabase.from('exam_answers').insert({
@@ -140,10 +137,10 @@ export default function ExamEditorPage() {
 
   if (authLoading || pageLoading) {
     return (
-      <div className="min-h-screen  flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading exam...</p>
+          <div className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading exam...</p>
         </div>
       </div>
     )
@@ -151,49 +148,46 @@ export default function ExamEditorPage() {
 
   if (!exam) {
     return (
-      <div className="min-h-screen  flex items-center justify-center">
-        <p className="text-gray-300">Exam not found</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-muted-foreground">Exam not found</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen ">
-      {/* Header */}
-      <header className="border-b border-slate-700 bg-slate-900/50 backdrop-blur">
+    <div className="min-h-screen">
+      <header className="border-b border-border bg-background/50 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link href={`/instructor/course/${exam.course_id}`} className="text-blue-400 hover:text-blue-300 text-sm mb-2 inline-block">
-            ← Back to Course
+          <Link href={`/instructor/course/${exam.course_id}`} className="text-primary hover:text-primary/80 text-sm mb-2 inline-block">
+            &larr; Back to Course
           </Link>
-          <h1 className="text-3xl font-bold text-white">Edit Exam {exam.exam_number}: {exam.title}</h1>
+          <h1 className="text-3xl font-bold text-foreground">Edit Exam {exam.exam_number}: {exam.title}</h1>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Add Question Form */}
         {showAddQuestion && (
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-8 mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Add Exam Question</h2>
+          <div className="bg-card border border-border rounded-xl p-8 mb-8">
+            <h2 className="text-2xl font-bold text-foreground mb-6">Add Exam Question</h2>
             <form onSubmit={handleAddQuestion} className="space-y-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Question Text</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Question Text</label>
                 <textarea
                   value={formData.question_text}
                   onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg"
+                  className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Question Type</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Question Type</label>
                   <select
                     value={formData.question_type}
                     onChange={(e) => setFormData({ ...formData, question_type: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg"
+                    className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="multiple_choice">Multiple Choice</option>
                     <option value="short_answer">Short Answer</option>
@@ -201,19 +195,19 @@ export default function ExamEditorPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Points</label>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">Points</label>
                   <input
                     type="number"
                     value={formData.points}
                     onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
                     min="1"
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg"
+                    className="w-full px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Answer Choices</label>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Answer Choices</label>
                 <div className="space-y-3">
                   {formData.answers.map((answer, index) => (
                     <div key={index} className="flex gap-2">
@@ -237,25 +231,25 @@ export default function ExamEditorPage() {
                           setFormData({ ...formData, answers: newAnswers })
                         }}
                         placeholder={`Answer choice ${index + 1}`}
-                        className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg"
+                        className="flex-1 px-4 py-2 bg-input border border-border text-foreground rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
                       />
-                      <span className="text-gray-400 text-sm pt-2">
-                        {answer.is_correct ? '✓ Correct' : 'Option'}
+                      <span className="text-muted-foreground text-sm pt-2">
+                        {answer.is_correct ? 'Correct' : 'Option'}
                       </span>
                     </div>
                   ))}
                 </div>
-                <p className="text-gray-400 text-xs mt-2">Check the checkbox to mark as the correct answer</p>
+                <p className="text-muted-foreground text-xs mt-2">Check the checkbox to mark as the correct answer</p>
               </div>
 
               <div className="flex gap-4">
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <Button type="submit" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
                   Add Question
                 </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  className="border-slate-600 bg-transparent"
+                  className="border-border"
                   onClick={() => setShowAddQuestion(false)}
                 >
                   Cancel
@@ -265,45 +259,44 @@ export default function ExamEditorPage() {
           </div>
         )}
 
-        {/* Questions List */}
         <div className="space-y-4">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-white">Questions ({questions.length})</h2>
+            <h2 className="text-2xl font-bold text-foreground">Questions ({questions.length})</h2>
             <Button
               onClick={() => setShowAddQuestion(!showAddQuestion)}
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
             >
               Add Question
             </Button>
           </div>
 
           {questions.length === 0 ? (
-            <div className="text-center py-12 bg-slate-800 border border-slate-700 rounded-xl">
-              <p className="text-gray-400 mb-4">No questions added yet</p>
+            <div className="text-center py-12 bg-card border border-border rounded-xl">
+              <p className="text-muted-foreground mb-4">No questions added yet</p>
               <Button
                 onClick={() => setShowAddQuestion(true)}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
               >
                 Add First Question
               </Button>
             </div>
           ) : (
             questions.map((question, index) => (
-              <div key={question.id} className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+              <div key={question.id} className="bg-card border border-border rounded-xl p-6">
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-bold text-white">Q{index + 1}: {question.question_text}</h3>
-                  <span className="text-sm bg-blue-600/20 text-blue-400 px-3 py-1 rounded">{question.points} pts</span>
+                  <h3 className="text-lg font-bold text-foreground">Q{index + 1}: {question.question_text}</h3>
+                  <span className="text-sm bg-secondary/10 text-secondary px-3 py-1 rounded">{question.points} pts</span>
                 </div>
-                <p className="text-gray-400 text-sm mb-4">Type: {question.question_type}</p>
+                <p className="text-muted-foreground text-sm mb-4">Type: {question.question_type}</p>
                 <div className="flex gap-3">
                   <Button
                     onClick={() => router.push(`/instructor/question/${question.id}/edit`)}
                     variant="outline"
-                    className="border-slate-600"
+                    className="border-border"
                   >
                     Edit
                   </Button>
-                  <Button variant="outline" className="border-red-600/50 text-red-400 bg-transparent">
+                  <Button variant="outline" className="border-destructive/50 text-destructive bg-transparent">
                     Delete
                   </Button>
                 </div>

@@ -4,54 +4,51 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Milky White + Rosegold Theme */
-  --background: #faf8f6;
-  --foreground: #1a1a2e;
+  /* Professional LMS Theme: Navy + White + Teal */
+  --background: #f8f9fb;
+  --foreground: #1a1f36;
   --card: #ffffff;
-  --card-foreground: #1a1a2e;
+  --card-foreground: #1a1f36;
   --popover: #ffffff;
-  --popover-foreground: #1a1a2e;
-  --primary: #b76e79;
+  --popover-foreground: #1a1f36;
+  --primary: #1a1f36;
   --primary-foreground: #ffffff;
-  --secondary: #4f46e5;
+  --secondary: #0d9488;
   --secondary-foreground: #ffffff;
-  --muted: #f3f0ed;
-  --muted-foreground: #6b6378;
-  --accent: #f3f0ed;
-  --accent-foreground: #1a1a2e;
-  --destructive: #ef4444;
+  --muted: #f1f3f7;
+  --muted-foreground: #64708a;
+  --accent: #f1f3f7;
+  --accent-foreground: #1a1f36;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: #e8e2dc;
-  --input: #faf8f6;
-  --ring: #b76e79;
-  --chart-1: #b76e79;
-  --chart-2: #4f46e5;
-  --chart-3: #06b6d4;
+  --border: #e2e5ed;
+  --input: #f8f9fb;
+  --ring: #0d9488;
+  --chart-1: #0d9488;
+  --chart-2: #1a1f36;
+  --chart-3: #3b82f6;
   --chart-4: #10b981;
   --chart-5: #f59e0b;
-  --radius: 0.625rem;
-  --sidebar: #faf8f6;
-  --sidebar-foreground: #1a1a2e;
-  --sidebar-primary: #b76e79;
+  --radius: 0.5rem;
+  --sidebar: #1a1f36;
+  --sidebar-foreground: #e2e5ed;
+  --sidebar-primary: #0d9488;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f3f0ed;
-  --sidebar-accent-foreground: #1a1a2e;
-  --sidebar-border: #e8e2dc;
-  --sidebar-ring: #b76e79;
+  --sidebar-accent: #252b45;
+  --sidebar-accent-foreground: #e2e5ed;
+  --sidebar-border: #252b45;
+  --sidebar-ring: #0d9488;
 
-  /* Navbar: rosegold */
-  --navbar: #b76e79;
+  /* Navbar: Dark navy */
+  --navbar: #1a1f36;
   --navbar-foreground: #ffffff;
-  --navbar-hover: #d4a0a8;
-  --navbar-active: #a25c66;
-  --rosegold: #b76e79;
-  --rosegold-light: #d4a0a8;
-  --rosegold-dark: #9a5560;
+  --navbar-hover: #252b45;
+  --navbar-active: #0d9488;
 }
 
 @theme {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: 'Inter', 'Geist', 'Geist Fallback', sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -92,9 +89,6 @@
   --color-navbar-foreground: var(--navbar-foreground);
   --color-navbar-hover: var(--navbar-hover);
   --color-navbar-active: var(--navbar-active);
-  --color-rosegold: var(--rosegold);
-  --color-rosegold-light: var(--rosegold-light);
-  --color-rosegold-dark: var(--rosegold-dark);
 }
 
 @layer base {

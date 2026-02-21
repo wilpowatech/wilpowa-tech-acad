@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/auth'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 
 interface GradeSummary {
   lab_score: number
@@ -45,7 +44,6 @@ export default function ProgressPage() {
 
   const fetchProgressData = async () => {
     try {
-      // Get enrollment and course
       const { data: enrollment } = await supabase
         .from('enrollments')
         .select('course_id')
@@ -66,7 +64,6 @@ export default function ProgressPage() {
 
       setCourse(courseData)
 
-      // Get grades summary
       const { data: gradesData } = await supabase
         .from('grades_summary')
         .select('*')
@@ -84,33 +81,31 @@ export default function ProgressPage() {
 
   if (loading || pageLoading) {
     return (
-      <div className="min-h-screen  flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading progress...</p>
+          <div className="w-12 h-12 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading progress...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen ">
-      {/* Header */}
-      <header className="border-b border-slate-700 bg-slate-900/50 backdrop-blur">
+    <div className="min-h-screen">
+      <header className="border-b border-border bg-background/50 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <Link href="/student/dashboard" className="text-blue-400 hover:text-blue-300 text-sm mb-2 inline-block">
-            ← Back to Dashboard
+          <Link href="/student/dashboard" className="text-primary hover:text-primary/80 text-sm mb-2 inline-block">
+            &larr; Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-bold text-white">📊 {course?.title} - Progress Report</h1>
+          <h1 className="text-3xl font-bold text-foreground">{course?.title} - Progress Report</h1>
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {grades ? (
           <div className="space-y-8">
             {/* Overall Score */}
-            <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-8 text-white">
+            <div className="bg-primary rounded-xl p-8 text-primary-foreground">
               <h2 className="text-3xl font-bold mb-4">Overall Score</h2>
               <div className="flex items-end gap-6">
                 <div className="text-7xl font-bold">{grades.overall_score}%</div>
@@ -123,7 +118,7 @@ export default function ProgressPage() {
                     {grades.overall_score < 60 && 'Needs Improvement - F'}
                   </p>
                   <p className="text-sm opacity-75">
-                    {grades.overall_score >= 70 ? '✓ Passing Grade' : '✗ Below Passing Grade'}
+                    {grades.overall_score >= 70 ? 'Passing Grade' : 'Below Passing Grade'}
                   </p>
                 </div>
               </div>
@@ -131,29 +126,14 @@ export default function ProgressPage() {
 
             {/* Grading Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <ScoreCard
-                title="📝 Labs"
-                score={grades.lab_score}
-                weight="40%"
-                description="Hands-on coding assignments"
-              />
-              <ScoreCard
-                title="📋 Quizzes"
-                score={grades.quiz_score}
-                weight="30%"
-                description="Lesson comprehension tests"
-              />
-              <ScoreCard
-                title="📊 Exams"
-                score={(grades.exam_1_score + grades.exam_2_score + grades.exam_3_score + grades.exam_4_score) / 4}
-                weight="30%"
-                description="Comprehensive assessments"
-              />
+              <ScoreCard title="Labs" score={grades.lab_score} weight="40%" description="Hands-on coding assignments" />
+              <ScoreCard title="Quizzes" score={grades.quiz_score} weight="30%" description="Lesson comprehension tests" />
+              <ScoreCard title="Exams" score={(grades.exam_1_score + grades.exam_2_score + grades.exam_3_score + grades.exam_4_score) / 4} weight="30%" description="Comprehensive assessments" />
             </div>
 
             {/* Exam Breakdown */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-white mb-6">Exam Scores</h3>
+            <div className="bg-card border border-border rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-foreground mb-6">Exam Scores</h3>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <ExamScoreCard exam={1} score={grades.exam_1_score} />
                 <ExamScoreCard exam={2} score={grades.exam_2_score} />
@@ -163,36 +143,21 @@ export default function ProgressPage() {
             </div>
 
             {/* Score Interpretation */}
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-white mb-4">Scoring Breakdown</h3>
-              <div className="space-y-3 text-gray-300">
-                <p>
-                  <span className="font-semibold">Labs (40%):</span> Practical coding skills demonstrated through lab
-                  assignments
-                </p>
-                <p>
-                  <span className="font-semibold">Quizzes (30%):</span> Understanding of course content and lesson
-                  materials
-                </p>
-                <p>
-                  <span className="font-semibold">Exams (30%):</span> Four comprehensive exams taken every 4 weeks to
-                  assess overall progress
-                </p>
+            <div className="bg-card border border-border rounded-xl p-8">
+              <h3 className="text-2xl font-bold text-foreground mb-4">Scoring Breakdown</h3>
+              <div className="space-y-3 text-muted-foreground">
+                <p><span className="font-semibold text-foreground">Labs (40%):</span> Practical coding skills demonstrated through lab assignments</p>
+                <p><span className="font-semibold text-foreground">Quizzes (30%):</span> Understanding of course content and lesson materials</p>
+                <p><span className="font-semibold text-foreground">Exams (30%):</span> Four comprehensive exams taken every 4 weeks to assess overall progress</p>
               </div>
             </div>
 
             {/* Certificate Eligibility */}
-            <div
-              className={`rounded-xl p-8 border ${
-                grades.overall_score >= 70
-                  ? 'bg-green-500/10 border-green-500/30'
-                  : 'bg-red-500/10 border-red-500/30'
-              }`}
-            >
-              <h3 className="text-2xl font-bold mb-2">
-                {grades.overall_score >= 70 ? '🎓 Certificate Eligible' : '❌ Not Eligible Yet'}
+            <div className={`rounded-xl p-8 border ${grades.overall_score >= 70 ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-destructive/10 border-destructive/30'}`}>
+              <h3 className="text-2xl font-bold text-foreground mb-2">
+                {grades.overall_score >= 70 ? 'Certificate Eligible' : 'Not Eligible Yet'}
               </h3>
-              <p className={grades.overall_score >= 70 ? 'text-green-400' : 'text-red-400'}>
+              <p className={grades.overall_score >= 70 ? 'text-emerald-600' : 'text-destructive'}>
                 {grades.overall_score >= 70
                   ? 'You have achieved a passing grade and are eligible to receive your certificate upon course completion.'
                   : `You need ${Math.ceil(70 - grades.overall_score)}% more points to reach the passing grade of 70%.`}
@@ -201,7 +166,7 @@ export default function ProgressPage() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-400">No grades available yet. Start completing course work to see your progress.</p>
+            <p className="text-muted-foreground">No grades available yet. Start completing course work to see your progress.</p>
           </div>
         )}
       </main>
@@ -209,37 +174,27 @@ export default function ProgressPage() {
   )
 }
 
-function ScoreCard({
-  title,
-  score,
-  weight,
-  description,
-}: {
-  title: string
-  score: number
-  weight: string
-  description: string
-}) {
+function ScoreCard({ title, score, weight, description }: { title: string; score: number; weight: string; description: string }) {
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-      <div className="text-4xl font-bold text-blue-400 mb-2">{score}%</div>
-      <p className="text-gray-400 text-sm mb-4">{description}</p>
-      <div className="bg-slate-700 rounded-full h-2 overflow-hidden mb-2">
-        <div className="bg-blue-500 h-full" style={{ width: `${score}%` }}></div>
+    <div className="bg-card border border-border rounded-xl p-6">
+      <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
+      <div className="text-4xl font-bold text-secondary mb-2">{score}%</div>
+      <p className="text-muted-foreground text-sm mb-4">{description}</p>
+      <div className="bg-muted rounded-full h-2 overflow-hidden mb-2">
+        <div className="bg-secondary h-full rounded-full transition-all" style={{ width: `${score}%` }}></div>
       </div>
-      <p className="text-gray-400 text-xs">Weight: {weight}</p>
+      <p className="text-muted-foreground text-xs">Weight: {weight}</p>
     </div>
   )
 }
 
 function ExamScoreCard({ exam, score }: { exam: number; score: number }) {
   return (
-    <div className="bg-slate-700 rounded-lg p-4 text-center">
-      <p className="text-gray-400 text-sm mb-2">Exam {exam}</p>
-      <p className="text-3xl font-bold text-blue-400">{score || '-'}%</p>
-      <div className="mt-2 bg-slate-600 rounded-full h-1 overflow-hidden">
-        {score > 0 && <div className="bg-green-500 h-full" style={{ width: `${score}%` }}></div>}
+    <div className="bg-muted rounded-lg p-4 text-center">
+      <p className="text-muted-foreground text-sm mb-2">Exam {exam}</p>
+      <p className="text-3xl font-bold text-secondary">{score || '-'}%</p>
+      <div className="mt-2 bg-border rounded-full h-1 overflow-hidden">
+        {score > 0 && <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${score}%` }}></div>}
       </div>
     </div>
   )

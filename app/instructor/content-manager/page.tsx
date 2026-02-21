@@ -4,7 +4,6 @@ import React from "react"
 
 import { useState } from 'react'
 import { supabase } from '@/lib/auth'
-import Navbar from '@/components/navbar'
 import { useAuth } from '@/hooks/useAuth'
 
 export default function ContentManager() {
@@ -65,11 +64,9 @@ export default function ContentManager() {
   }
 
   return (
-    <>
-      <Navbar user={user} profile={profile} />
       <div className="min-h-screen bg-background">
         <div className="max-w-6xl mx-auto px-4 py-8">
-          <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-8 text-foreground">
             Course Content Manager
           </h1>
 
@@ -179,7 +176,7 @@ export default function ContentManager() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-lg bg-gradient-to-r from-primary to-secondary text-primary-foreground font-bold hover:opacity-90 disabled:opacity-50 transition"
+              className="w-full py-3 rounded-lg bg-secondary text-secondary-foreground font-bold hover:bg-secondary/90 disabled:opacity-50 transition"
             >
               {loading ? 'Adding Content...' : `Add ${activeTab.slice(0, -1)}`}
             </button>
@@ -200,12 +197,11 @@ export default function ContentManager() {
               <p className="text-muted-foreground text-sm">Labs (1 per week)</p>
             </div>
             <div className="bg-card border border-border rounded-lg p-6">
-              <div className="text-[#00ff88] text-2xl font-bold">4</div>
+              <div className="text-secondary text-2xl font-bold">4</div>
               <p className="text-muted-foreground text-sm">Exams</p>
             </div>
           </div>
         </div>
       </div>
-    </>
   )
 }

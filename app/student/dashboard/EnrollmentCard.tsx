@@ -90,7 +90,7 @@ export default function EnrollmentCard({ enrollment }: { enrollment: Enrollment 
         {/* Progress and Actions */}
         <div className="flex gap-4">
           <Link href={`/student/course/${enrollment.id}`} className="flex-1">
-            <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90">
+            <Button className="w-full bg-secondary text-secondary-foreground hover:bg-secondary/90">
               Continue Course
             </Button>
           </Link>
