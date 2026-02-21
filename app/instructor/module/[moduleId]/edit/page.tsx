@@ -7,7 +7,6 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import Navbar from '@/components/navbar'
 
 // ─── Types ───
 interface Module { id: string; week_number: number; title: string; course_id: string }
@@ -52,7 +51,6 @@ export default function ModuleEditPage() {
   const [quizForms, setQuizForms] = useState<Record<number, QuizQuestion[]>>({})
   const [selectedStudents, setSelectedStudents] = useState<Record<number, Set<string>>>({})
   const [scheduleDates, setScheduleDates] = useState<Record<number, string>>({})
-  const [deadlineHours, setDeadlineHours] = useState<Record<number, number>>({})
   const [deadlineHours, setDeadlineHours] = useState<Record<number, number>>({})  // hours until deadline from access date
 
   // ─── Auth guard ───
@@ -366,7 +364,6 @@ export default function ModuleEditPage() {
 
   return (
     <div className="min-h-screen">
-      <Navbar user={user} profile={profile} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

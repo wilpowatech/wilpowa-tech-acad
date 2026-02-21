@@ -115,7 +115,7 @@ export default function CoursesPage() {
               return (
                 <div key={course.id} className="bg-card/80 border border-border rounded-xl overflow-hidden flex flex-col hover:border-primary/30 transition-colors">
                   {/* Course color band */}
-                  <div className="h-2 bg-gradient-to-r from-primary to-secondary" />
+                  <div className="h-2 bg-secondary" />
                   <div className="p-6 flex flex-col flex-1">
                     <h2 className="text-lg font-bold text-foreground mb-2 text-balance">{course.title}</h2>
                     <p className="text-sm text-muted-foreground mb-4 flex-1 leading-relaxed">{course.description || 'No description provided.'}</p>
